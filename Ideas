@@ -23,7 +23,10 @@ How to sense between course and fine foam?
  - Wheel encoders?
  - Camera vision?
  - Ultrasonic distance sensors?
- - Light emmiters and recievers for detecting block types?
+ - Light emmiters and receivers for detecting block types?
 
-
-testing
+Block detection
+- Use a long reach system to collect it from anywhere
+- Use camera vision
+- Use an ultrasonic distance sensor
+- Try each location in turn until a block is found
