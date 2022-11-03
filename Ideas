@@ -18,8 +18,8 @@ How to sense between course and fine foam?
  - What speed will we try to drive at?
  
  Sensors
- - Colour sensor for line following?
- - Accelerometer?
+ - Colour sensor for line following? Multiple colour sensors to understand where to move to continue following the line? 
+ - Accelerometer? Could be for 
  - Wheel encoders?
  - Camera vision?
  - Ultrasonic distance sensors?
