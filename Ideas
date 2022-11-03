@@ -1,3 +1,26 @@
 How to sense between course and fine foam?
  - Resistive touch sensors test the force applied - could design a lever arm to dip a set amount and test force at that point?
- - IRLED & phototrasistor to test light reflecitvity or pass-through.
+ - IRLED & phototrasistor to test light reflecitvity or pass-through. This could either be front to back, with a "crane" that comes down over the cube, or side to side, with a lobster-like set of grabbers
+ - Speaker and microphone to identify how well the sound passes through the foam
+ - Measure the mass of the cube
+ - Camera vision?
+ 
+ Motion system
+ - Two motorised front wheels and a castor at the back (best choice?)
+ - Two motorised rear wheels and a castor at the front
+ - Two motorised rear wheels and a free wheel at the front
+ - Two motorised rear wheels and two front wheels with a steering rack
+ - Two free front wheels and a motorised rear castor wheel with a motorised turning system
+ 
+ Route
+ - Will we go through the tunnel, over the bridge, or over the wall?
+ - Will we stick to the line or follow the edge of the table?
+ - What speed will we try to drive at?
+ 
+ Sensors
+ - Colour sensor for line following?
+ - Accelerometer?
+ - Wheel encoders?
+ - Camera vision?
+ - Ultrasonic distance sensors?
+ - Light emmiters and recievers for detecting block types?
