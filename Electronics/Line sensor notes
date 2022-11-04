@@ -1,0 +1,20 @@
+// WG Created: 4/11/22 Modified: 4/11/22
+// Notes on the line sensor
+
+
+Collector resistance | Max distance above the white
+
+10 kohms | 8 mm
+12.2 kohms | 9 mm
+14.7 kohms | 9 mm
+16.9 kohms | 10 mm
+20 kohms | 10 mm
+24.7 kohms | 10 mm
+30 kohms | 8 mm
+40 kohms | 11 mm
+
+
+tape width = 1.8 mm
+
+
+Conclusions: connect a 100 ohm resistor to the emitter and a 10kohm resistor to the signal
