@@ -1,6 +1,7 @@
 {
-    "board": "arduino:avr:uno",
+    "board": "arduino:megaavr:uno2018",
     "programmer": "arduino:avrisp",
     "port": "/dev/tty.usbmodem101",
-    "sketch": "Code/Will_Gibbens_Code/Will_Gibbens_Code.ino"
+    "sketch": "Code/Will_Gibbens_Code/Will_Gibbens_Code.ino",
+    "configuration": "mode=on"
 }

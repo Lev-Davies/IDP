@@ -1,33 +1,32 @@
-// WG Created: 4/11/22 Modified: 4/11/22
-// testing the line sensors
+// WG Created: 4/11/22 Modified: 7/11/22
+// testing the line sensors, with four line sensors and a Schmitt Trigger
 
-const int emitterPin = 13;                // This is the yellow wire for the diode
-const int signalPin =  9;                 // This is the blue wire for the receiver
-int sensorState = 0;                      // variable for reading the sensor state
-float sensorValue = 0;
-int zeros_counter = 0;
-int ones_counter = 0;
+const int sensorOnePin = 2;
+const int sensorTwoPin =  3;
+const int sensorThreePin = 4;
+const int sensorFourPin = 5;
+int sensorOneState = 0;                      // variable for reading thestate of sensor 1
+int sensorTwoState = 0;                      // variable for reading thestate of sensor 2
+int sensorThreeState = 0;                      // variable for reading thestate of sensor 3
+int sensorFourState = 0;                      // variable for reading thestate of sensor 4
 
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  pinMode(emitterPin, OUTPUT);
-  pinMode(signalPin, INPUT);
-  digitalWrite(emitterPin, HIGH);
+  pinMode(sensorOnePin, INPUT);
+  pinMode(sensorTwoPin, INPUT);
+  pinMode(sensorThreePin, INPUT);
+  pinMode(sensorFourPin, INPUT);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  sensorValue = analogRead(signalPin);
-  sensorState = digitalRead(signalPin);
-  if (sensorState == 1) {
-    ones_counter = ones_counter + 1;
-  }
-  else if (sensorState == 0) {
-    zeros_counter = zeros_counter + 1;
-  }
-  String outputText = "Value: " + String(sensorValue) + " State: " + String(sensorState) + " Whites: " + String(zeros_counter)+ " Blacks: " + String(ones_counter);
+  sensorOneState = digitalRead(sensorOnePin);
+  sensorTwoState = digitalRead(sensorTwoPin);
+  sensorThreeState = digitalRead(sensorThreePin);
+  sensorFourState = digitalRead(sensorFourPin);
+
+  String outputText = "Sensor 1: " + String(sensorOneState) + " Sensor 2: " + String(sensorTwoState) + " Sensor 3: " + String(sensorThreeState) + " Sensor 4: " + String(sensorFourState);
   Serial.println(outputText);
   delay(100);
 }

@@ -66,7 +66,8 @@ def collection_process(block_location):
         node_type_2(11)
     elif block_location == 2:
         node_type_10(7)
-        # Path 19
+        follow_path(19)
+        
         pass
     elif block_location == 3:
         pass
