@@ -30,9 +30,10 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
-    //sensorValue = analogRead(signalPin);
     sensorLeft = digitalRead(sensorPin1);
     sensorRight = digitalRead(sensorPin2);
+    String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight);
+    Serial.println(outputText);
     if (( sensorLeft && sensorRight ) == 1) {
       motorLeft->setSpeed(255);
       motorRight->setSpeed(255);
@@ -54,4 +55,5 @@ void loop() {
       motorLeft->run(RELEASE);
       motorRight->run(RELEASE);
     }
+    delay(10);
 }
