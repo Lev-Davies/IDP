@@ -13,21 +13,15 @@ float sensorValue = 0;
 
 // testing the line sensors
 
-const int emitterPin1 = 13;                // This is the yellow wire for the diode
-const int emitterPin2 = 12;
-const int signalPin1 =  9;                 // This is the white wire for the receiver
-const int signalPin2 = 10;           // This is the white wire for the receiver
+const int sensorPin1 =  2;
+const int sensorPin2 = 3;
 int sensorLeft = 0;  
 int sensorRight = 0;                     // variable for reading the sensor state
 
 void setup() {
   Serial.begin(9600);
-  pinMode(emitterPin1, OUTPUT);
-  digitalWrite(emitterPin1, HIGH);
-  pinMode(signalPin1, INPUT);
-  pinMode(emitterPin2, OUTPUT);
-  digitalWrite(emitterPin2, HIGH);
-  pinMode(signalPin2, INPUT);
+  pinMode(sensorPin1, INPUT);
+  pinMode(sensorPin2, INPUT);
   // initialize digital pin LED_BUILTIN as an output.
   AFMS.begin();
   motorLeft->setSpeed(255);
@@ -37,8 +31,8 @@ void setup() {
 // the loop function runs over and over again forever
 void loop() {
     //sensorValue = analogRead(signalPin);
-    sensorLeft = digitalRead(signalPin1);
-    sensorRight = digitalRead(signalPin2);
+    sensorLeft = digitalRead(sensorPin1);
+    sensorRight = digitalRead(sensorPin2);
     if (( sensorLeft && sensorRight ) == 1) {
       motorLeft->setSpeed(255);
       motorRight->setSpeed(255);
