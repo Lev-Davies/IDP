@@ -1,0 +1,62 @@
+// making two motors move using a two light sensors
+
+
+#include <Wire.h>
+#include <Adafruit_MotorShield.h>
+#include "utility/Adafruit_MS_PWMServoDriver.h"
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+Adafruit_DCMotor *myMotor1 = AFMS.getMotor(1);
+Adafruit_DCMotor *myMotor2 = AFMS.getMotor(2);
+
+// unsigned long previous_time = 0;
+
+// testing the line sensors
+
+const int emitterPin1 = 13;                // This is the yellow wire for the diode
+const int emitterPin2 = 12;
+const int signalPin1 =  9;                 // This is the white wire for the receiver
+const int signalPin2 = 10;
+int sensorState = 0;                      // variable for reading the sensor state
+int zeros_counter = 0;
+int ones_counter = 0;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(emitterPin1, OUTPUT);
+  digitalWrite(emitterPin1, HIGH);
+  pinMode(signalPin1, INPUT);
+  pinMode(emitterPin2, OUTPUT);
+  digitalWrite(emitterPin2, HIGH);
+  pinMode(signalPin2, INPUT);
+  // initialize digital pin LED_BUILTIN as an output.
+  AFMS.begin();
+  myMotor1->setSpeed(0);
+  myMotor2->setSpeed(0);
+}
+
+// the loop function runs over and over again forever
+void loop() {
+    //unsigned long current_time = millis();
+    /*if (current_time - previous_time >= 10000){
+      myMotor->run(RELEASE);
+    } else {
+    myMotor->run(FORWARD);
+    } */
+         // wait for a second
+    sensorState1 = digitalRead(signalPin1);
+    Serial.println(sensorState1);
+    if (sensorState1 == 0){
+      myMotor1->run(FORWARD);
+  }
+    }else {
+      myMotor1->run(RELEASE);
+    }
+    sensorState2 = digitalRead(signalPin2);
+    Serial.println(sensorState2);
+    if (sensorState2 == 0){
+      myMotor2->run(FORWARD);
+    }else {
+      myMotor2->run(RELEASE);
+    }
+    
+}
