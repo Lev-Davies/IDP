@@ -16,7 +16,8 @@ const int emitterPin1 = 13;                // This is the yellow wire for the di
 const int emitterPin2 = 12;
 const int signalPin1 =  9;                 // This is the white wire for the receiver
 const int signalPin2 = 10;
-int sensorState = 0;                      // variable for reading the sensor state
+int sensorState1 = 0;                      // variable for reading the sensor state
+int sensorState2 = 0;
 int zeros_counter = 0;
 int ones_counter = 0;
 
