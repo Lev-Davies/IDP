@@ -30,8 +30,8 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
-    sensorLeft = digitalRead(sensorPin1);
-    sensorRight = digitalRead(sensorPin2);
+    sensorLeft = 1 - digitalRead(sensorPin1);
+    sensorRight = 1 - digitalRead(sensorPin2);
     String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight);
     Serial.println(outputText);
     if (( sensorLeft && sensorRight ) == 1) {
