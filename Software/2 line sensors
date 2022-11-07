@@ -5,8 +5,9 @@
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
-Adafruit_DCMotor *myMotor1 = AFMS.getMotor(1);
-Adafruit_DCMotor *myMotor2 = AFMS.getMotor(2);
+Adafruit_DCMotor *motorLeft = AFMS.getMotor(1);
+Adafruit_DCMotor *motorRight = AFMS.getMotor(2);
+float sensorValue = 0;
 
 // unsigned long previous_time = 0;
 
@@ -15,11 +16,9 @@ Adafruit_DCMotor *myMotor2 = AFMS.getMotor(2);
 const int emitterPin1 = 13;                // This is the yellow wire for the diode
 const int emitterPin2 = 12;
 const int signalPin1 =  9;                 // This is the white wire for the receiver
-const int signalPin2 = 10;
-int sensorState1 = 0;                      // variable for reading the sensor state
-int sensorState2 = 0;
-int zeros_counter = 0;
-int ones_counter = 0;
+const int signalPin2 = 10;           // This is the white wire for the receiver
+int sensorLeft = 0;  
+int sensorRight = 0;                     // variable for reading the sensor state
 
 void setup() {
   Serial.begin(9600);
@@ -31,33 +30,34 @@ void setup() {
   pinMode(signalPin2, INPUT);
   // initialize digital pin LED_BUILTIN as an output.
   AFMS.begin();
-  myMotor1->setSpeed(0);
-  myMotor2->setSpeed(0);
+  motorLeft->setSpeed(255);
+  motorRight->setSpeed(255);
 }
 
 // the loop function runs over and over again forever
 void loop() {
-    //unsigned long current_time = millis();
-    /*if (current_time - previous_time >= 10000){
-      myMotor->run(RELEASE);
-    } else {
-    myMotor->run(FORWARD);
-    } */
-         // wait for a second
-    sensorState1 = digitalRead(signalPin1);
-    Serial.println(sensorState1);
-    if (sensorState1 == 0){
-      myMotor1->run(FORWARD);
-  }
-    }else {
-      myMotor1->run(RELEASE);
+    //sensorValue = analogRead(signalPin);
+    sensorLeft = digitalRead(signalPin1);
+    sensorRight = digitalRead(signalPin2);
+    if (( sensorLeft && sensorRight ) == 1) {
+      motorLeft->setSpeed(255);
+      motorRight->setSpeed(255);
+      motorLeft->run(FORWARD);
+      motorRight->run(FORWARD);
+    } else if (sensorLeft == 0 && sensorRight == 1){
+      motorLeft->setSpeed(80);
+      motorRight->setSpeed(255);
+      motorLeft->run(FORWARD);
+      motorRight->run(FORWARD);
+    } else if (sensorRight == 0 && sensorLeft == 1){
+      motorLeft->setSpeed(255);
+      motorRight->setSpeed(80);
+      motorLeft->run(FORWARD);
+      motorRight->run(FORWARD);
+    } else if ((sensorLeft && sensorRight) == 0) {
+      motorLeft->setSpeed(255);
+      motorRight->setSpeed(255);
+      motorLeft->run(RELEASE);
+      motorRight->run(RELEASE);
     }
-    sensorState2 = digitalRead(signalPin2);
-    Serial.println(sensorState2);
-    if (sensorState2 == 0){
-      myMotor2->run(FORWARD);
-    }else {
-      myMotor2->run(RELEASE);
-    }
-    
 }
