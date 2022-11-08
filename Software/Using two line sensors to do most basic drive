@@ -28,7 +28,7 @@ void setup() {
   // initialize digital pin LED_BUILTIN as an output.
   AFMS.begin();
   motorLeft->setSpeed(255);
-  motorRight->setSpeed(254);
+  motorRight->setSpeed(255);
 }
 
 // the loop function runs over and over again forever
