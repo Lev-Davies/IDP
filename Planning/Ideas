@@ -4,6 +4,8 @@ How to sense between course and fine foam?
  - Speaker and microphone to identify how well the sound passes through the foam
  - Measure the mass of the cube
  - Camera vision?
+ - "Stab" through the foam with the LED. Coarse will not allow for stabbing, but the fine foam will allow for this stabbing. This way, light can be more easily detected on the other side in one case compared to another. 
+ - Two oppositely charged plates, one on each "arm" of the robot, if a potential difference comes through then this signals to the robot to activate "coarse foam" code, and if not, activate "fine foam" code.
  
  Motion system
  - Two motorised front wheels and a castor at the back (best choice?)
@@ -11,7 +13,7 @@ How to sense between course and fine foam?
  - Two motorised rear wheels and a free wheel at the front
  - Two motorised rear wheels and two front wheels with a steering rack
  - Two free front wheels and a motorised rear castor wheel with a motorised turning system
- - Also, which wheels will use for the motorised wheels, small or large?
+ - Also, which wheels will use for the motorised wheels, small or large? Small appears to have the advantage of being slower, hence reducing the car's ability to veer off in an irrecoverable direction. However, fast has the advantage of being faster, allowing for more blocks to be picked up in the same time. 
  
  Route
  - Will we go through the tunnel, over the bridge, or over the wall?
@@ -25,9 +27,10 @@ How to sense between course and fine foam?
  - Camera vision?
  - Ultrasonic distance sensors?
  - Light emmiters and receivers for detecting block types?
+ - Charged plate, or some kind of charged object, allowing for a voltage to pass through (sensing touch?)
 
 Block detection
 - Use a long reach system to collect it from anywhere
 - Use camera vision
-- Use an ultrasonic distance sensor
+- Use an ultrasonic distance sensor (must confirm that only the blocks on one side are being picked up)
 - Try each location in turn until a block is found
