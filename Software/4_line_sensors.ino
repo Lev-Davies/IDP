@@ -15,13 +15,19 @@ float sensorValue = 0;
 
 const int sensorPin1 =  2;
 const int sensorPin2 = 3;
+const int sensorPin3 =  4;
+const int sensorPin4 = 5;
 int sensorLeft = 0;  
 int sensorRight = 0;                     // variable for reading the sensor state
+int sensorForwardLeft = 0;  
+int sensorForwardRight = 0;
 
 void setup() {
   Serial.begin(9600);
   pinMode(sensorPin1, INPUT);
   pinMode(sensorPin2, INPUT);
+  pinMode(sensorPin3, INPUT);
+  pinMode(sensorPin4, INPUT);
   // initialize digital pin LED_BUILTIN as an output.
   AFMS.begin();
   motorLeft->setSpeed(255);
@@ -32,7 +38,9 @@ void setup() {
 void loop() {
     sensorLeft = 1 - digitalRead(sensorPin1);
     sensorRight = 1 - digitalRead(sensorPin2);
-    String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight);
+    sensorForwardLeft = 1 - digitalRead(sensorPin3);
+    sensorForwardRight = 1 - digitalRead(sensorPin4);
+    String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) + " Forward Left: " + String(sensorForwardLeft) + " Forward Right: " + String(sensorForwardRight);
     Serial.println(outputText);
     if (( sensorLeft && sensorRight ) == 1) {
       motorLeft->setSpeed(255);
