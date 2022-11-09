@@ -1,0 +1,22 @@
+int LEDpin = 7;  //set the pin of the LED
+int sensorPin = A0;    // select the input pin for the potentiometer
+int sensorValue = 0;  // variable to store the value coming from the sensor
+
+void setup() {
+  // put your setup code here, to run once:
+pinMode(LEDpin, OUTPUT);
+Serial.begin(9600);           //Start serial and set the correct Baud Rate
+pinMode(sensorPin,INPUT);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+sensorValue = analogRead(sensorPin);
+Serial.println(sensorValue);
+if (sensorValue > 0){
+  digitalWrite(LEDpin, HIGH);
+}else{
+  digitalWrite(LEDpin, LOW);
+}
+}
