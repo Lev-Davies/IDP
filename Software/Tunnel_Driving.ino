@@ -11,15 +11,8 @@ const int recievePin = 8;
 void setup() {
   // initialize serial communication:
   Serial.begin(9600);
-    long duration, mm;
-  const int kp = 20;
-  const int ki = 0;
-  const int target = 200;
-  int I, P, prev_I, error;
-    unsigned long current_time = 0;
-  unsigned long prev_time = 0;
-    AFMS.begin();
-    const int med_speed = 150;
+  AFMS.begin();
+  const int med_speed = 150;
   motorLeft->setSpeed(med_speed);
   motorRight->setSpeed(med_speed);
 }
@@ -29,7 +22,14 @@ void loop() {
   // establish variables for duration of the ping, and the distance result
   // in millimeters:
 
-    unsigned long current_time = millies();
+    unsigned long current_time = millis();
+    const int med_speed = 150;
+        long duration, mm;
+  const int kp = 1;
+  const int ki = 0;
+  const int target = 200;
+  int I, P, prev_I, error;
+  unsigned long prev_time = 0;
 
   // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
@@ -59,9 +59,24 @@ void loop() {
     prev_time = current_time;
     prev_I = I;
 
+    double speedLeft = med_speed - error;
+    double speedRight = med_speed + error;
 
-    motorLeft->setSpeed(med_speed - error);
-    motorRight->setSpeed(med_speed + error);
+    if(speedLeft > 255){
+      speedLeft = 255;
+    }
+    if(speedLeft < 0){
+      speedLeft = 0;
+    }
+     if(speedRight > 255){
+      speedRight = 255;
+    }
+    if(speedRight < 0){
+      speedRight = 0;
+    }
+
+    motorLeft->setSpeed(speedLeft);
+    motorRight->setSpeed(speedRight);
 
   delay(50);
 }
