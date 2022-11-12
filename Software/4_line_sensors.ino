@@ -36,30 +36,31 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
+    // 0 = white, 1 = black
     sensorLeft = 1 - digitalRead(sensorPin1);
     sensorRight = 1 - digitalRead(sensorPin2);
     sensorForwardLeft = 1 - digitalRead(sensorPin3);
     sensorForwardRight = 1 - digitalRead(sensorPin4);
     String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) + " Forward Left: " + String(sensorForwardLeft) + " Forward Right: " + String(sensorForwardRight);
     Serial.println(outputText);
-    if (( sensorLeft && sensorRight ) == 1) {
-      motorLeft->setSpeed(255);
-      motorRight->setSpeed(255);
+    if (( sensorLeft && sensorRight ) == 0) {
+      motorLeft->setSpeed(140);
+      motorRight->setSpeed(140);
       motorLeft->run(FORWARD);
       motorRight->run(FORWARD);
     } else if (sensorLeft == 0 && sensorRight == 1){
-      motorLeft->setSpeed(80);
-      motorRight->setSpeed(255);
+      motorLeft->setSpeed(40);
+      motorRight->setSpeed(210);
       motorLeft->run(FORWARD);
       motorRight->run(FORWARD);
     } else if (sensorRight == 0 && sensorLeft == 1){
-      motorLeft->setSpeed(255);
-      motorRight->setSpeed(80);
+      motorLeft->setSpeed(210);
+      motorRight->setSpeed(40);
       motorLeft->run(FORWARD);
       motorRight->run(FORWARD);
-    } else if ((sensorLeft && sensorRight) == 0) {
-      motorLeft->setSpeed(255);
-      motorRight->setSpeed(255);
+    } else if ((sensorLeft && sensorRight) == 1) {
+      motorLeft->setSpeed(140);
+      motorRight->setSpeed(130);
       motorLeft->run(RELEASE);
       motorRight->run(RELEASE);
     }
