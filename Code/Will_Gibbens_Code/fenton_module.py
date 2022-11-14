@@ -1,6 +1,14 @@
 # WG Created: 6/11/22 Modified: 12/11/22
 # Python code for the overarching route planning
 
+import serial
+import time
+
+ArduinoSerial = serial.Serial('com7',9600) #Create Serial port object called arduinoSerialData INSERT COM INTO 'COM18'
+time.sleep(2) # Wait two seconds for the connection to establish
+print(ArduinoSerial.readline()) #read the serial data and print it as line
+
+
 path_lengths = {2:16, 4:68, 6:232, 8:38, 10:38, 12:108, 14:76, 16:68, 17:16, 19:18, 20:18, 21:16}
 
 def follow_path(path_number, direction = "forward"):
@@ -9,6 +17,8 @@ def follow_path(path_number, direction = "forward"):
     if path_number not in allowable_locations:
         return "There is an error. {0} is not a path that can be followed.".format(path_number)
     path_length = path_lengths[path_number]
+    serial_data = "follow_path"
+    ArduinoSerial.write(serial_data.encode())
     return path_length
 
 def node_type_1(node_number, direction = "forward"):
@@ -16,6 +26,8 @@ def node_type_1(node_number, direction = "forward"):
     allowable_locations = [1, 3, 5, 7, 11, 15]
     if node_number not in allowable_locations:
         return "There is an error. {0} is not a T-junction node.".format(node_number)
+    serial_data = "node_type_1"
+    ArduinoSerial.write(serial_data.encode())
     pass
 
 def node_type_2(node_number, direction = "forward"):
