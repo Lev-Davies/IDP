@@ -71,24 +71,27 @@ void loop() {
   String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) + " Forward Left: " + String(sensorForwardLeft) + " Forward Right: " + String(sensorForwardRight);
   Serial.println(outputText);
   if (sensorLeft == 0 && sensorRight == 0) {
+    Serial.println("Line mode");
     motorLeft->setSpeed(220);
     motorRight->setSpeed(220);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   } else if (sensorLeft == 0 && sensorRight == 1){
-    motorLeft->setSpeed(-20);
+    Serial.println("Line mode");
+    motorLeft->setSpeed(0);
     motorRight->setSpeed(210);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   } else if (sensorRight == 0 && sensorLeft == 1){
     motorLeft->setSpeed(210);
-    motorRight->setSpeed(-20);
+    motorRight->setSpeed(0);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   } else if ((sensorLeft && sensorRight) == 1) {
+    Serial.println("Ultrasonic mode");
     motorLeft->run(FORWARD);
    motorRight->run(FORWARD);
-   const int med_speed = 150;
+   const int med_speed = 190;
    // establish variables for duration of the ping, and the distance result
    // in inches and centimeters:
    long pingTime, mm;
@@ -137,7 +140,6 @@ void loop() {
 
     motorLeft->setSpeed(speedLeft);
     motorRight->setSpeed(speedRight);
-    delay(90);
   }
   delay(10);
 /*
