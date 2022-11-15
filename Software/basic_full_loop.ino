@@ -22,7 +22,7 @@ const int grabberServoPin = 9;
 // Define tunnel driving variables
 const int kp = 3;
 const int ki = 3;
-const int target = 81;
+const int target = 41;
 int I, P, prev_I, error;
 unsigned long current_time = 0;
 unsigned long prev_time = 0;
@@ -64,6 +64,29 @@ void setup() {
 
 void loop() {
   // 0 = white, 1 = black
+  long pingTime, mm;
+  const int med_speed = 160;
+  // establish variables for duration of the ping, and the distance result
+  // in inches and centimeters:
+  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
+   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+   digitalWrite(pingPin, LOW);
+   delayMicroseconds(2);
+   digitalWrite(pingPin, HIGH);
+   delayMicroseconds(5);
+   digitalWrite(pingPin, LOW);
+
+   pingTime = pulseIn(recievePin, HIGH);
+
+   mm = distance_in_millimeters(pingTime);
+   Serial.print(mm);
+   Serial.print("mm");
+   Serial.println();
+
+   // The same pin is used to read the signal from the PING))): a HIGH pulse
+   // whose duration is the time (in microseconds) from the sending of the ping
+   // to the reception of its echo off of an object.
+
   sensorLeft = 1 - digitalRead(sensorLeftPin);
   sensorRight = 1 - digitalRead(sensorRightPin);
   sensorForwardLeft = 1 - digitalRead(sensorForwardLeftPin);
@@ -78,43 +101,21 @@ void loop() {
     motorRight->run(FORWARD);
   } else if (sensorLeft == 0 && sensorRight == 1){
     Serial.println("Line mode");
-    motorLeft->setSpeed(0);
-    motorRight->setSpeed(210);
+    motorLeft->setSpeed(20);
+    motorRight->setSpeed(220);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   } else if (sensorRight == 0 && sensorLeft == 1){
-    motorLeft->setSpeed(210);
-    motorRight->setSpeed(0);
+    motorLeft->setSpeed(220);
+    motorRight->setSpeed(20);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   } else if ((sensorLeft && sensorRight) == 1) {
     Serial.println("Ultrasonic mode");
     motorLeft->run(FORWARD);
-   motorRight->run(FORWARD);
-   const int med_speed = 190;
-   // establish variables for duration of the ping, and the distance result
-   // in inches and centimeters:
-   long pingTime, mm;
-
-   // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
-   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-   digitalWrite(pingPin, LOW);
-   delayMicroseconds(2);
-   digitalWrite(pingPin, HIGH);
-   delayMicroseconds(5);
-   digitalWrite(pingPin, LOW);
-
-   // The same pin is used to read the signal from the PING))): a HIGH pulse
-   // whose duration is the time (in microseconds) from the sending of the ping
-   // to the reception of its echo off of an object.
-   pingTime = pulseIn(recievePin, HIGH);
-
-   // convert the time into a distance
-   mm = distance_in_millimeters(pingTime);
-   Serial.print(mm);
-   Serial.print("mm");
-   Serial.println();
-
+    motorRight->run(FORWARD);
+  
+  if (mm < 180){
    //controlling motor
  P = target - mm;
     I = prev_I + P*(current_time-prev_time);
@@ -122,8 +123,8 @@ void loop() {
     prev_time = current_time;
     prev_I = I;
 
-    double speedLeft = med_speed - error;
-    double speedRight = med_speed + error;
+    double speedLeft = med_speed + error;
+    double speedRight = med_speed - error;
 
     if(speedLeft > 255){
       speedLeft = 255;
@@ -140,6 +141,12 @@ void loop() {
 
     motorLeft->setSpeed(speedLeft);
     motorRight->setSpeed(speedRight);
+  }else {
+    motorLeft->setSpeed(220);
+    motorRight->setSpeed(220);
+    motorLeft->run(FORWARD);
+    motorRight->run(FORWARD);
+  }
   }
   delay(10);
 /*
