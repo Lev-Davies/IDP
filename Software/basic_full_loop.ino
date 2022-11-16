@@ -132,14 +132,14 @@ void loop() {
   }
   else if (sensorLeft == 0 && sensorRight == 1){
     Serial.println("Line mode");
-    motorLeft->setSpeed(20);
-    motorRight->setSpeed(220);
+    motorLeft->setSpeed(220);
+    motorRight->setSpeed(20);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   }
   else if (sensorRight == 0 && sensorLeft == 1){
-    motorLeft->setSpeed(220);
-    motorRight->setSpeed(20);
+    motorLeft->setSpeed(20);
+    motorRight->setSpeed(220);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   }
