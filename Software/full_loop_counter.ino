@@ -1,4 +1,7 @@
-// LW & LD Created: 4/11/22 Modified: 15/11/22
+// WG Created: 4/11/22 Modified: 15/11/22
+// testing the line sensors, with four line sensors and a Schmitt Trigger
+// Testing the servo
+// Adding flashing light
 
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
@@ -15,12 +18,12 @@ const int sensorForwardLeftPin = 4;
 const int sensorForwardRightPin = 5;
 const int tunnelPingPin = 6;
 const int tunnelRecievePin = 7;
-const int blockPingPin = 8;
-const int blockRecievePin = 9;
-const int grabberServoPin = 10;
-const int orangeLedPin = 11;
-const int greenLedPin = 12;
-const int redLedPin = 13;
+//const int blockPingPin = 8;
+//const int blockRecievePin = 9;
+//const int grabberServoPin = 10;
+//const int orangeLedPin = 11;
+//const int greenLedPin = 12;
+//const int redLedPin = 13;
 
 // Define tunnel driving variables
 const int kp = 3;
@@ -31,20 +34,20 @@ unsigned long current_time = 0;
 unsigned long prev_time = 0;
 
 // Define constants
-const int grabber_closed_position = 0;// degrees
-const int grabber_open_position = 140; // degrees
-const int beacon_flashing_frequency = 2; // Hz
+//const int grabber_closed_position = 80;// degrees
+//const int grabber_open_position = 140; // degrees
+//const int beacon_flashing_frequency = 2; // Hz
 
 // Initiate variables
 bool sensorLeft;
 bool sensorRight;
 bool sensorForwardLeft;
 bool sensorForwardRight;
-bool orangeLedState = 0;
-long last_flash_time;
+//bool orangeLedState = 0;
+//long last_flash_time;
 int pos_counter = 0;
 
-Servo grabber;  // create servo object to control a servo
+// Servo grabber;  // create servo object to control a servo
 
 long distance_in_millimeters(long microseconds){
    // The speed of sound is 340 m/s or 29 microseconds per centimeter.
@@ -63,20 +66,20 @@ void setup() {
   pinMode(sensorForwardRightPin, INPUT);
   pinMode(tunnelPingPin, OUTPUT);
   pinMode(tunnelRecievePin, INPUT);
-  pinMode(blockPingPin, OUTPUT);
-  pinMode(blockRecievePin, INPUT);
-  pinMode(orangeLedPin, OUTPUT);
-  digitalWrite(orangeLedPin, LOW);
-  pinMode(greenLedPin, OUTPUT);
-  pinMode(redLedPin, OUTPUT);
+  //pinMode(blockPingPin, OUTPUT);
+  //pinMode(blockRecievePin, INPUT);
+  //pinMode(orangeLedPin, OUTPUT);
+  //digitalWrite(orangeLedPin, LOW);
+  //pinMode(greenLedPin, OUTPUT);
+  //pinMode(redLedPin, OUTPUT);
   AFMS.begin();
   motorLeft->setSpeed(200);
   motorRight->setSpeed(200);
-  grabber.attach(grabberServoPin);
+  //grabber.attach(grabberServoPin);
 }
 
 void loop() {
-  // 0 = white, 1 = black
+  // 1 = white, 0 = black
   long pingTime, mm;
   const int med_speed = 160;
   // establish variables for duration of the ping, and the distance result
@@ -118,8 +121,9 @@ void loop() {
   sensorRight = digitalRead(sensorRightPin);
   sensorForwardLeft = digitalRead(sensorForwardLeftPin);
   sensorForwardRight = digitalRead(sensorForwardRightPin);
-  String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) + " Forward Left: " + String(sensorForwardLeft) + " Forward Right: " + String(sensorForwardRight);
-  Serial.println(outputText);
+  //String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) + " Forward Left: " + String(sensorForwardLeft) + " Forward Right: " + String(sensorForwardRight);
+  //Serial.println(outputText);
+  Serial.println(pos_counter);
 
   switch(pos_counter){
     case 0:
