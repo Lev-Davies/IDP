@@ -13,7 +13,7 @@ long distance_in_millimeters(long microseconds){
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(9600); 
   pinMode(blockPingPin, OUTPUT);
   pinMode(blockRecievePin, INPUT);
 }
