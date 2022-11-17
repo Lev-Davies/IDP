@@ -101,23 +101,7 @@ void loop() {
     motorRight->setSpeed(225);
     motorLeft->run(FORWARD);
     motorRight->run(BACKWARD);
-    delay(1200);
-  } else if (sensorLeft == 0 && sensorRight == 1 && sensorForwardRight== 0) {
-    Serial.println("Turn mode");
-    delay(200);
-    motorLeft->setSpeed(255);
-    motorRight->setSpeed(225);
-    motorLeft->run(FORWARD);
-    motorRight->run(BACKWARD);
-    delay(1200);
-    } else if (sensorLeft == 1 && sensorRight == 0 && sensorForwardRight== 0) {
-    Serial.println("Turn mode");
-    delay(200);
-    motorLeft->setSpeed(255);
-    motorRight->setSpeed(225);
-    motorLeft->run(FORWARD);
-    motorRight->run(BACKWARD);
-    delay(1200);
+    delay(1200); 
     }else if (sensorLeft == 0 && sensorRight == 0 && sensorForwardRight== 1) {
     Serial.println("Line mode");
     motorLeft->setSpeed(220);
@@ -126,16 +110,37 @@ void loop() {
     motorRight->run(FORWARD);
   }
   } else if (sensorLeft == 0 && sensorRight == 1){
-    Serial.println("Line mode");
+    if ((sensorLeft == 0 || sensorRight == 1) && sensorForwardRight== 0) {
+    Serial.println("Turn mode");
+    delay(200);
+    motorLeft->setSpeed(255);
+    motorRight->setSpeed(225);
+    motorLeft->run(FORWARD);
+    motorRight->run(BACKWARD);
+    delay(1200);
+    } else {
+      Serial.println("Line mode");
     motorLeft->setSpeed(220);
     motorRight->setSpeed(20);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
+    }
   } else if (sensorRight == 0 && sensorLeft == 1){
+    if ((sensorLeft == 0 || sensorRight == 1) && sensorForwardRight== 0) {
+    Serial.println("Turn mode");
+    delay(200);
+    motorLeft->setSpeed(255);
+    motorRight->setSpeed(225);
+    motorLeft->run(FORWARD);
+    motorRight->run(BACKWARD);
+    delay(1200);
+    } else {
+      Serial.println("Line mode");
     motorLeft->setSpeed(20);
     motorRight->setSpeed(220);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
+    }
   } else if ((sensorLeft && sensorRight) == 1) {
     Serial.println("Ultrasonic mode");
     motorLeft->run(FORWARD);
