@@ -7,8 +7,8 @@ Adafruit_DCMotor *motorLeft = AFMS.getMotor(1);
 Adafruit_DCMotor *motorRight = AFMS.getMotor(2);
 
 // Define all pin numbers
-const int sensorLeftPin = 2;
-const int sensorRightPin =  3;
+const int sensorLeftPin = A1;
+const int sensorRightPin = A0;
 const int sensorForwardLeftPin = 4;
 const int sensorForwardRightPin = 5;
 const int pingPin = 7;
@@ -26,11 +26,12 @@ unsigned long prev_time = 0;
 // Define constants
 const int grabber_closed_position = 80;
 const int grabber_open_position = 140;
-const int lineThreshold = 900; // depends on the distance of the line sensor to the ground
+const int lineThreshold = 600; // depends on the distance of the line sensor to the ground (according to my experience, the larger the distance, the higher the threshold is) 
+// we might also need to set a threshold for each line sensor, since I found that they sometimes had different analog readings for the same color.
 
 // Initiate variables
 int sensorLeft;  
-int sensorRight;                     // variable for reading the sensor state
+int sensorRight;                    
 int sensorForwardLeft;  
 int sensorForwardRight;
 int analogLeft;
@@ -56,8 +57,8 @@ void setup() {
   pinMode(pingPin, OUTPUT);
   pinMode(recievePin, INPUT);
   AFMS.begin();
-  motorLeft->setSpeed(200);
-  motorRight->setSpeed(200);
+  motorLeft->setSpeed(130);
+  motorRight->setSpeed(130);
   grabber.attach(9);  // attaches the servo on pin 9 to the servo object
 }
 
@@ -65,6 +66,8 @@ void loop() {
   // 0 = white, 1 = black
   analogLeft = analogRead(sensorLeftPin);
   analogRight = analogRead(sensorRightPin);
+
+//this block of the code is only for some output on the serial monitor
   if (analogLeft >= lineThreshold)
       sensorLeft = 1; // black
     else
@@ -74,27 +77,25 @@ void loop() {
       sensorRight = 1; // black
     else
       sensorRight = 0; // white
- 
 
-  sensorForwardLeft = 1 - digitalRead(sensorForwardLeftPin);
-  sensorForwardRight = 1 - digitalRead(sensorForwardRightPin);
-  String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) + " Forward Left: " + String(sensorForwardLeft) + " Forward Right: " + String(sensorForwardRight);
+  String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) ;
+  Serial.println(analogLeft);
+  Serial.println(analogRight);
   Serial.println(outputText);
 
+//The code to control the motor
   if (analogLeft <= lineThreshold && analogRight <= lineThreshold) {
-    Serial.println("Line mode");
     motorLeft->setSpeed(220);
     motorRight->setSpeed(220);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
-  } else if (analogLeft - analogRight <= -100){
-    Serial.println("Line mode");
+  } else if (analogLeft - analogRight <= -200){ // I used the difference in analog reading to decide whether we need a left or right turn
     motorLeft->setSpeed(0);
-    motorRight->setSpeed(210);
+    motorRight->setSpeed(220);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
-  } else if (analogLeft - analogRight >= 100){
-    motorLeft->setSpeed(210);
+  } else if (analogLeft - analogRight >= 200){
+    motorLeft->setSpeed(220);
     motorRight->setSpeed(0);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
@@ -102,56 +103,6 @@ void loop() {
     Serial.println("Ultrasonic mode");
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
-    
-    const int med_speed = 190;
-    // establish variables for duration of the ping, and the distance result
-    // in inches and centimeters:
-    long pingTime, mm;
-
-    // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
-    // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-    digitalWrite(pingPin, LOW);
-    delayMicroseconds(2);
-    digitalWrite(pingPin, HIGH);
-    delayMicroseconds(5);
-    digitalWrite(pingPin, LOW);
-
-    // The same pin is used to read the signal from the PING))): a HIGH pulse
-    // whose duration is the time (in microseconds) from the sending of the ping
-    // to the reception of its echo off of an object.
-    pingTime = pulseIn(recievePin, HIGH);
-
-    // convert the time into a distance
-    mm = distance_in_millimeters(pingTime);
-    Serial.print(mm);
-    Serial.print("mm");
-    Serial.println();
-
-   //controlling motor
-    P = target - mm;
-    I = prev_I + P*(current_time-prev_time);
-    error = kp*P + ki*I;
-    prev_time = current_time;
-    prev_I = I;
-
-    double speedLeft = med_speed - error;
-    double speedRight = med_speed + error;
-
-    if(speedLeft > 255){
-      speedLeft = 255;
-    }
-    if(speedLeft < 0){
-      speedLeft = 0;
-    }
-     if(speedRight > 255){
-      speedRight = 255;
-    }
-    if(speedRight < 0){
-      speedRight = 0;
-    }
-
-    motorLeft->setSpeed(speedLeft);
-    motorRight->setSpeed(speedRight);
   }
   delay(10);
 /*
