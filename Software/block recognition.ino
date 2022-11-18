@@ -21,6 +21,8 @@ const int orangeLedPin = 11;
 const int greenLedPin = 12;
 const int redLedPin = 13;
 
+int density = 1; // the density is initialised as 1 (high). Once there is a low reading, it will become 0 and will not be back to 1 unless a reset function to be called.
+
 long distance_in_millimeters(long microseconds){
    // The speed of sound is 340 m/s or 29 microseconds per centimeter.
    // The ping travels out and back, so to find the distance of the object we
@@ -51,17 +53,14 @@ void setup() {
   digitalWrite(redLedPin, LOW);
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:  
+int foamRecognition() {
   long pingTime, mm;
-  const int med_speed = 160;
-  int density;
   double ave_mm = 0; //average distance
-  // establish variables for duration of the ping, and the distance result
-  // in inches and centimeters:
-  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
-   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-  for (int cycle = 0; cycle < 15; cycle += 1){
+  int numberOfCylesForAverage = 4;
+  int foamType; // 1 or 0 - high or low
+  int DistanceThreshold = 400; // if the distance from sensor is below this value, it will be recognised as low density - if IR is used simultanously, this can be modified and compared with the result from IR sensor
+
+  for (int cycle = 0; cycle < numberOfCylesForAverage; cycle += 1){
     digitalWrite(blockPingPin, LOW);
     delayMicroseconds(2);
     digitalWrite(blockPingPin, HIGH);
@@ -77,16 +76,30 @@ void loop() {
     //Serial.println();
     delay(20);     
   }
-  ave_mm = ave_mm / 10;
-  if (ave_mm <= 400){
-    density = 0; //low density
+
+  ave_mm = ave_mm / numberOfCylesForAverage;
+
+  if (ave_mm <= DistanceThreshold){
+    foamType = 0; //low density
     Serial.println("low");
     Serial.println(ave_mm);
   } else {
-    density = 1; //high density
+    foamType = 1; //high density
     Serial.println("high");
     Serial.println(ave_mm);
   }
+  return foamType;
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:  
+  const int med_speed = 160;
+
+
+  if (foamRecognition() == 0){
+    density = 0;
+  }
+  Serial.println(density);
   delay(5);
    
 }
