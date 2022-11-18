@@ -1,4 +1,4 @@
-// WG Created: 4/11/22 Modified: 14/11/22
+// WG Created: 4/11/22 Modified: 18/11/22
 // testing the line sensors, with four line sensors and a Schmitt Trigger
 // Testing the servo
 
@@ -10,14 +10,23 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *motorLeft = AFMS.getMotor(1);
 Adafruit_DCMotor *motorRight = AFMS.getMotor(2);
 
-// Define all pin numbers
-const int sensorLeftPin = 2;
-const int sensorRightPin =  3;
-const int sensorForwardLeftPin = 4;
-const int sensorForwardRightPin = 5;
-const int ultrasonicTriggerPin = 7;
-const int ultrasonicEchoPin = 8;
-const int grabberServoPin = 9;
+// Define all pin numbers (updated for prototype board)
+const int sensorLeftPinDigital = 2;
+const int sensorRightPinDigital =  3;
+const int sensorForwardLeftPinDigital = 4;
+const int sensorForwardRightPinDigital = 5;
+const int sensorLeftPinAnalog = A0;
+const int sensorRightPinAnalog =  A1;
+const int sensorForwardLeftPinAnalog = A2;
+const int sensorForwardRightPinAnalog = A3;
+const int blockPingPin = 6;
+const int blockReceivePin = 7;
+const int grabberServoPin = 8;
+const int tunnelPingPin = 9;
+const int tunnelReceivePin = 10;
+const int orangeLedPin = 11;
+const int greenLedPin = 12;
+const int redLedPin = 13;
 
 
 // Define constants
@@ -36,10 +45,24 @@ Servo grabber;  // create servo object to control a servo
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  pinMode(sensorLeftPin, INPUT);
-  pinMode(sensorRightPin, INPUT);
-  pinMode(sensorForwardLeftPin, INPUT);
-  pinMode(sensorForwardRightPin, INPUT);
+  pinMode(sensorLeftPinDigital, INPUT);
+  pinMode(sensorRightPinDigital, INPUT);
+  pinMode(sensorForwardLeftPinDigital, INPUT);
+  pinMode(sensorForwardRightPinDigital, INPUT);
+  pinMode(sensorLeftPinAnalog, INPUT);
+  pinMode(sensorRightPinAnalog, INPUT);
+  pinMode(sensorForwardLeftPinAnalog, INPUT);
+  pinMode(sensorForwardRightPinAnalog, INPUT);
+  pinMode(blockPingPin, OUTPUT);
+  pinMode(blockReceivePin, INPUT);
+  pinMode(tunnelPingPin, OUTPUT);
+  pinMode(tunnelReceivePin, INPUT);
+  pinMode(orangeLedPin, OUTPUT);
+  digitalWrite(orangeLedPin, LOW);
+  pinMode(greenLedPin, OUTPUT);
+  digitalWrite(greenLedPin, LOW);
+  pinMode(redLedPin, OUTPUT);
+  digitalWrite(redLedPin, LOW);
   AFMS.begin();
   motorLeft->setSpeed(255);
   motorRight->setSpeed(255);
@@ -48,10 +71,10 @@ void setup() {
 
 void loop() {
   // 0 = white, 1 = black
-  sensorLeft = 1 - digitalRead(sensorLeftPin);
-  sensorRight = 1 - digitalRead(sensorRightPin);
-  sensorForwardLeft = 1 - digitalRead(sensorForwardLeftPin);
-  sensorForwardRight = 1 - digitalRead(sensorForwardRightPin);
+  sensorLeft = 1 - digitalRead(sensorLeftPinDigital);
+  sensorRight = 1 - digitalRead(sensorRightPinDigital);
+  sensorForwardLeft = 1 - digitalRead(sensorForwardLeftPinDigital);
+  sensorForwardRight = 1 - digitalRead(sensorForwardRightPinDigital);
   String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) + " Forward Left: " + String(sensorForwardLeft) + " Forward Right: " + String(sensorForwardRight);
   Serial.println(outputText);
   if (sensorLeft == 0 && sensorRight == 0) {

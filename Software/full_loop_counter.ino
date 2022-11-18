@@ -1,4 +1,4 @@
-// WG Created: 4/11/22 Modified: 15/11/22
+// WG Created: 4/11/22 Modified: 18/11/22
 // testing the line sensors, with four line sensors and a Schmitt Trigger
 // Testing the servo
 // Adding flashing light
@@ -11,19 +11,23 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *motorLeft = AFMS.getMotor(1);
 Adafruit_DCMotor *motorRight = AFMS.getMotor(2);
 
-// Define all pin numbers
-const int sensorLeftPin = 2;
-const int sensorRightPin =  3;
-const int sensorForwardLeftPin = 4;
-const int sensorForwardRightPin = 5;
-const int tunnelPingPin = 6;
-const int tunnelRecievePin = 7;
-//const int blockPingPin = 8;
-//const int blockRecievePin = 9;
-//const int grabberServoPin = 10;
-//const int orangeLedPin = 11;
-//const int greenLedPin = 12;
-//const int redLedPin = 13;
+// Define all pin numbers (updated for prototype board)
+const int sensorLeftPinDigital = 2;
+const int sensorRightPinDigital =  3;
+const int sensorForwardLeftPinDigital = 4;
+const int sensorForwardRightPinDigital = 5;
+const int sensorLeftPinAnalog = A0;
+const int sensorRightPinAnalog =  A1;
+const int sensorForwardLeftPinAnalog = A2;
+const int sensorForwardRightPinAnalog = A3;
+const int blockPingPin = 6;
+const int blockReceivePin = 7;
+const int grabberServoPin = 8;
+const int tunnelPingPin = 9;
+const int tunnelReceivePin = 10;
+const int orangeLedPin = 11;
+const int greenLedPin = 12;
+const int redLedPin = 13;
 
 // Define tunnel driving variables
 const int kp = 3;
@@ -60,18 +64,24 @@ long distance_in_millimeters(long microseconds){
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  pinMode(sensorLeftPin, INPUT);
-  pinMode(sensorRightPin, INPUT);
-  pinMode(sensorForwardLeftPin, INPUT);
-  pinMode(sensorForwardRightPin, INPUT);
+  pinMode(sensorLeftPinDigital, INPUT);
+  pinMode(sensorRightPinDigital, INPUT);
+  pinMode(sensorForwardLeftPinDigital, INPUT);
+  pinMode(sensorForwardRightPinDigital, INPUT);
+  pinMode(sensorLeftPinAnalog, INPUT);
+  pinMode(sensorRightPinAnalog, INPUT);
+  pinMode(sensorForwardLeftPinAnalog, INPUT);
+  pinMode(sensorForwardRightPinAnalog, INPUT);
+  pinMode(blockPingPin, OUTPUT);
+  pinMode(blockReceivePin, INPUT);
   pinMode(tunnelPingPin, OUTPUT);
-  pinMode(tunnelRecievePin, INPUT);
-  //pinMode(blockPingPin, OUTPUT);
-  //pinMode(blockRecievePin, INPUT);
-  //pinMode(orangeLedPin, OUTPUT);
-  //digitalWrite(orangeLedPin, LOW);
-  //pinMode(greenLedPin, OUTPUT);
-  //pinMode(redLedPin, OUTPUT);
+  pinMode(tunnelReceivePin, INPUT);
+  pinMode(orangeLedPin, OUTPUT);
+  digitalWrite(orangeLedPin, LOW);
+  pinMode(greenLedPin, OUTPUT);
+  digitalWrite(greenLedPin, LOW);
+  pinMode(redLedPin, OUTPUT);
+  digitalWrite(redLedPin, LOW);
   AFMS.begin();
   motorLeft->setSpeed(200);
   motorRight->setSpeed(200);
@@ -92,7 +102,7 @@ void loop() {
    delayMicroseconds(5);
    digitalWrite(tunnelPingPin, LOW);
 
-   pingTime = pulseIn(tunnelRecievePin, HIGH);
+   pingTime = pulseIn(tunnelReceivePin, HIGH);
 
    mm = distance_in_millimeters(pingTime);
    Serial.print(mm);
@@ -117,10 +127,10 @@ void loop() {
   }
   */
   // Get data from the line sensors - 1 = white
-  sensorLeft = digitalRead(sensorLeftPin);
-  sensorRight = digitalRead(sensorRightPin);
-  sensorForwardLeft = digitalRead(sensorForwardLeftPin);
-  sensorForwardRight = digitalRead(sensorForwardRightPin);
+  sensorLeft = digitalRead(sensorLeftPinDigital);
+  sensorRight = digitalRead(sensorRightPinDigital);
+  sensorForwardLeft = digitalRead(sensorForwardLeftPinDigital);
+  sensorForwardRight = digitalRead(sensorForwardRightPinDigital);
   //String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) + " Forward Left: " + String(sensorForwardLeft) + " Forward Right: " + String(sensorForwardRight);
   //Serial.println(outputText);
   Serial.println(pos_counter);

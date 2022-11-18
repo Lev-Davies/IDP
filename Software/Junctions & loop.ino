@@ -1,4 +1,5 @@
 // LD & WADDELL Created: 04/11/22 Modified: 17/11/22
+// Modified by WG on 18/11/22 to update pin numbers for prototyping board
 // testing the line sensors, with four line sensors and a Schmitt Trigger
 // Testing the servo
 
@@ -10,14 +11,23 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *motorLeft = AFMS.getMotor(1);
 Adafruit_DCMotor *motorRight = AFMS.getMotor(2);
 
-// Define all pin numbers
-const int sensorLeftPin = 2;
-const int sensorRightPin =  3;
-const int sensorForwardLeftPin = 4;
-const int sensorForwardRightPin = 5;
-const int pingPin = 6;
-const int recievePin = 7;
-const int grabberServoPin = 9;
+// Define all pin numbers (updated for prototype board)
+const int sensorLeftPinDigital = 2;
+const int sensorRightPinDigital =  3;
+const int sensorForwardLeftPinDigital = 4;
+const int sensorForwardRightPinDigital = 5;
+const int sensorLeftPinAnalog = A0;
+const int sensorRightPinAnalog =  A1;
+const int sensorForwardLeftPinAnalog = A2;
+const int sensorForwardRightPinAnalog = A3;
+const int blockPingPin = 6;
+const int blockReceivePin = 7;
+const int grabberServoPin = 8;
+const int tunnelPingPin = 9;
+const int tunnelReceivePin = 10;
+const int orangeLedPin = 11;
+const int greenLedPin = 12;
+const int redLedPin = 13;
 
 // Define tunnel driving variables
 const int kp = 3;
@@ -50,12 +60,24 @@ long distance_in_millimeters(long microseconds){
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  pinMode(sensorLeftPin, INPUT);
-  pinMode(sensorRightPin, INPUT);
-  pinMode(sensorForwardLeftPin, INPUT);
-  pinMode(sensorForwardRightPin, INPUT);
-  pinMode(pingPin, OUTPUT);
-  pinMode(recievePin, INPUT);
+  pinMode(sensorLeftPinDigital, INPUT);
+  pinMode(sensorRightPinDigital, INPUT);
+  pinMode(sensorForwardLeftPinDigital, INPUT);
+  pinMode(sensorForwardRightPinDigital, INPUT);
+  pinMode(sensorLeftPinAnalog, INPUT);
+  pinMode(sensorRightPinAnalog, INPUT);
+  pinMode(sensorForwardLeftPinAnalog, INPUT);
+  pinMode(sensorForwardRightPinAnalog, INPUT);
+  pinMode(blockPingPin, OUTPUT);
+  pinMode(blockReceivePin, INPUT);
+  pinMode(tunnelPingPin, OUTPUT);
+  pinMode(tunnelReceivePin, INPUT);
+  pinMode(orangeLedPin, OUTPUT);
+  digitalWrite(orangeLedPin, LOW);
+  pinMode(greenLedPin, OUTPUT);
+  digitalWrite(greenLedPin, LOW);
+  pinMode(redLedPin, OUTPUT);
+  digitalWrite(redLedPin, LOW);
   AFMS.begin();
   motorLeft->setSpeed(200);
   motorRight->setSpeed(200);
@@ -70,13 +92,13 @@ void loop() {
   // in inches and centimeters:
   // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
    // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-   digitalWrite(pingPin, LOW);
+   digitalWrite(tunnelPingPin, LOW);
    delayMicroseconds(2);
-   digitalWrite(pingPin, HIGH);
+   digitalWrite(tunnelPingPin, HIGH);
    delayMicroseconds(5);
-   digitalWrite(pingPin, LOW);
+   digitalWrite(tunnelPingPin, LOW);
 
-   pingTime = pulseIn(recievePin, HIGH);
+   pingTime = pulseIn(tunnelReceivePin, HIGH);
 
    mm = distance_in_millimeters(pingTime);
    Serial.print(mm);
@@ -87,10 +109,10 @@ void loop() {
    // whose duration is the time (in microseconds) from the sending of the ping
    // to the reception of its echo off of an object.
 
-  sensorLeft = 1 - digitalRead(sensorLeftPin);
-  sensorRight = 1 - digitalRead(sensorRightPin);
-  sensorForwardLeft = 1 - digitalRead(sensorForwardLeftPin);
-  sensorForwardRight = 1 - digitalRead(sensorForwardRightPin);
+  sensorLeft = 1 - digitalRead(sensorLeftPinDigital);
+  sensorRight = 1 - digitalRead(sensorRightPinDigital);
+  sensorForwardLeft = 1 - digitalRead(sensorForwardLeftPinDigital);
+  sensorForwardRight = 1 - digitalRead(sensorForwardRightPinDigital);
   String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) + " Forward Left: " + String(sensorForwardLeft) + " Forward Right: " + String(sensorForwardRight);
   Serial.println(outputText);
   if (sensorLeft == 0 && sensorRight == 0) {

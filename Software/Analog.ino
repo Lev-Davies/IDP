@@ -6,14 +6,23 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *motorLeft = AFMS.getMotor(1);
 Adafruit_DCMotor *motorRight = AFMS.getMotor(2);
 
-// Define all pin numbers
-const int sensorLeftPin = A1;
-const int sensorRightPin = A0;
-const int sensorForwardLeftPin = 4;
-const int sensorForwardRightPin = 5;
-const int pingPin = 7;
-const int recievePin = 8;
-const int grabberServoPin = 9;
+// Define all pin numbers (updated for prototype board)
+const int sensorLeftPinDigital = 2;
+const int sensorRightPinDigital =  3;
+const int sensorForwardLeftPinDigital = 4;
+const int sensorForwardRightPinDigital = 5;
+const int sensorLeftPinAnalog = A0;
+const int sensorRightPinAnalog =  A1;
+const int sensorForwardLeftPinAnalog = A2;
+const int sensorForwardRightPinAnalog = A3;
+const int blockPingPin = 6;
+const int blockReceivePin = 7;
+const int grabberServoPin = 8;
+const int tunnelPingPin = 9;
+const int tunnelReceivePin = 10;
+const int orangeLedPin = 11;
+const int greenLedPin = 12;
+const int redLedPin = 13;
 
 // Define tunnel driving variables
 const int kp = 3;
@@ -50,12 +59,24 @@ long distance_in_millimeters(long microseconds){
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  pinMode(sensorLeftPin, INPUT);
-  pinMode(sensorRightPin, INPUT);
-  pinMode(sensorForwardLeftPin, INPUT);
-  pinMode(sensorForwardRightPin, INPUT);
-  pinMode(pingPin, OUTPUT);
-  pinMode(recievePin, INPUT);
+  pinMode(sensorLeftPinDigital, INPUT);
+  pinMode(sensorRightPinDigital, INPUT);
+  pinMode(sensorForwardLeftPinDigital, INPUT);
+  pinMode(sensorForwardRightPinDigital, INPUT);
+  pinMode(sensorLeftPinAnalog, INPUT);
+  pinMode(sensorRightPinAnalog, INPUT);
+  pinMode(sensorForwardLeftPinAnalog, INPUT);
+  pinMode(sensorForwardRightPinAnalog, INPUT);
+  pinMode(blockPingPin, OUTPUT);
+  pinMode(blockReceivePin, INPUT);
+  pinMode(tunnelPingPin, OUTPUT);
+  pinMode(tunnelReceivePin, INPUT);
+  pinMode(orangeLedPin, OUTPUT);
+  digitalWrite(orangeLedPin, LOW);
+  pinMode(greenLedPin, OUTPUT);
+  digitalWrite(greenLedPin, LOW);
+  pinMode(redLedPin, OUTPUT);
+  digitalWrite(redLedPin, LOW);
   AFMS.begin();
   motorLeft->setSpeed(130);
   motorRight->setSpeed(130);
@@ -64,8 +85,8 @@ void setup() {
 
 void loop() {
   // 0 = white, 1 = black
-  analogLeft = analogRead(sensorLeftPin);
-  analogRight = analogRead(sensorRightPin);
+  analogLeft = analogRead(sensorLeftPinAnalog);
+  analogRight = analogRead(sensorRightPinAnalog);
 
 //this block of the code is only for some output on the serial monitor
   if (analogLeft >= lineThreshold)

@@ -5,20 +5,55 @@
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 Adafruit_DCMotor *motorLeft = AFMS.getMotor(1);
 Adafruit_DCMotor *motorRight = AFMS.getMotor(2);
-// this constant won't change. It's the pin number of the sensor's output:
- const int pingPin = 7;
- const int recievePin = 8;
- const int kp = 3;
-  const int ki = 3;
-  const int target = 81;
-  int I, P, prev_I, error;
-  unsigned long current_time = 0;
-  unsigned long prev_time = 0;
+
+// Define all pin numbers (updated for prototype board)
+const int sensorLeftPinDigital = 2;
+const int sensorRightPinDigital =  3;
+const int sensorForwardLeftPinDigital = 4;
+const int sensorForwardRightPinDigital = 5;
+const int sensorLeftPinAnalog = A0;
+const int sensorRightPinAnalog =  A1;
+const int sensorForwardLeftPinAnalog = A2;
+const int sensorForwardRightPinAnalog = A3;
+const int blockPingPin = 6;
+const int blockReceivePin = 7;
+const int grabberServoPin = 8;
+const int tunnelPingPin = 9;
+const int tunnelReceivePin = 10;
+const int orangeLedPin = 11;
+const int greenLedPin = 12;
+const int redLedPin = 13;
+
+// Define other constants
+const int kp = 3;
+const int ki = 3;
+const int target = 81;
+int I, P, prev_I, error;
+unsigned long current_time = 0;
+unsigned long prev_time = 0;
 
  void setup() {
-   // initialize serial communication:
-   Serial.begin(9600);
-   AFMS.begin();
+  // initialize serial communication:
+  Serial.begin(9600);
+  pinMode(sensorLeftPinDigital, INPUT);
+  pinMode(sensorRightPinDigital, INPUT);
+  pinMode(sensorForwardLeftPinDigital, INPUT);
+  pinMode(sensorForwardRightPinDigital, INPUT);
+  pinMode(sensorLeftPinAnalog, INPUT);
+  pinMode(sensorRightPinAnalog, INPUT);
+  pinMode(sensorForwardLeftPinAnalog, INPUT);
+  pinMode(sensorForwardRightPinAnalog, INPUT);
+  pinMode(blockPingPin, OUTPUT);
+  pinMode(blockReceivePin, INPUT);
+  pinMode(tunnelPingPin, OUTPUT);
+  pinMode(tunnelReceivePin, INPUT);
+  pinMode(orangeLedPin, OUTPUT);
+  digitalWrite(orangeLedPin, LOW);
+  pinMode(greenLedPin, OUTPUT);
+  digitalWrite(greenLedPin, LOW);
+  pinMode(redLedPin, OUTPUT);
+  digitalWrite(redLedPin, LOW);
+  AFMS.begin();
   const int med_speed = 150;
   motorLeft->setSpeed(med_speed);
   motorRight->setSpeed(med_speed);
@@ -34,18 +69,18 @@ Adafruit_DCMotor *motorRight = AFMS.getMotor(2);
 
    // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
    // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-   pinMode(pingPin, OUTPUT);
-   digitalWrite(pingPin, LOW);
+   pinMode(tunnelPingPin, OUTPUT);
+   digitalWrite(tunnelPingPin, LOW);
    delayMicroseconds(2);
-   digitalWrite(pingPin, HIGH);
+   digitalWrite(tunnelPingPin, HIGH);
    delayMicroseconds(5);
-   digitalWrite(pingPin, LOW);
+   digitalWrite(tunnelPingPin, LOW);
 
    // The same pin is used to read the signal from the PING))): a HIGH pulse
    // whose duration is the time (in microseconds) from the sending of the ping
    // to the reception of its echo off of an object.
-   pinMode(recievePin, INPUT);
-   pingTime = pulseIn(recievePin, HIGH);
+   pinMode(tunnelReceivePin, INPUT);
+   pingTime = pulseIn(tunnelReceivePin, HIGH);
 
    // convert the time into a distance
    mm = distance_in_millimeters(pingTime);
