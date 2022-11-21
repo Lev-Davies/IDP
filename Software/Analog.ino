@@ -12,7 +12,7 @@ const int sensorRightPinDigital =  3;
 const int sensorForwardLeftPinDigital = 4;
 const int sensorForwardRightPinDigital = 5;
 const int sensorLeftPinAnalog = A0;
-const int sensorRightPinAnalog =  A1;
+const int sensorRightPinAnalog = A1;
 const int sensorForwardLeftPinAnalog = A2;
 const int sensorForwardRightPinAnalog = A3;
 const int blockPingPin = 6;
@@ -35,7 +35,8 @@ unsigned long prev_time = 0;
 // Define constants
 const int grabber_closed_position = 80;
 const int grabber_open_position = 140;
-const int lineThreshold = 600; // depends on the distance of the line sensor to the ground (according to my experience, the larger the distance, the higher the threshold is) 
+const int lineThresholdLeft = 500;
+const int lineThresholdRight = 400; // depends on the distance of the line sensor to the ground (according to my experience, the larger the distance, the higher the threshold is) 
 // we might also need to set a threshold for each line sensor, since I found that they sometimes had different analog readings for the same color.
 
 // Initiate variables
@@ -45,6 +46,8 @@ int sensorForwardLeft;
 int sensorForwardRight;
 int analogLeft;
 int analogRight;
+int analogForwardLeft;
+int analogForwardRight;
 
 Servo grabber;  // create servo object to control a servo
 
@@ -87,45 +90,49 @@ void loop() {
   // 0 = white, 1 = black
   analogLeft = analogRead(sensorLeftPinAnalog);
   analogRight = analogRead(sensorRightPinAnalog);
+  analogForwardLeft = analogRead(sensorForwardLeftPinAnalog);
+  analogForwardRight = analogRead(sensorForwardRightPinAnalog);
 
 //this block of the code is only for some output on the serial monitor
-  if (analogLeft >= lineThreshold)
+  if (analogLeft >= lineThresholdLeft)
       sensorLeft = 1; // black
     else
       sensorLeft = 0; // white
 
-  if (analogRight >= lineThreshold)
+  if (analogRight >= lineThresholdLeft)
       sensorRight = 1; // black
     else
       sensorRight = 0; // white
 
-  String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) ;
+  String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight);
   Serial.println(analogLeft);
   Serial.println(analogRight);
+  Serial.println(analogForwardLeft);
+  Serial.println(analogForwardRight);
   Serial.println(outputText);
 
 //The code to control the motor
-  if (analogLeft <= lineThreshold && analogRight <= lineThreshold) {
+  if (analogLeft <= lineThresholdLeft && analogRight <= lineThresholdRight) {
     motorLeft->setSpeed(220);
     motorRight->setSpeed(220);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
-  } else if (analogLeft - analogRight <= -200){ // I used the difference in analog reading to decide whether we need a left or right turn
+  } else if (analogLeft <= lineThresholdLeft && analogRight >= lineThresholdRight){ // or use the difference in analog reading to decide whether we need a left or right turn
     motorLeft->setSpeed(0);
     motorRight->setSpeed(220);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
-  } else if (analogLeft - analogRight >= 200){
+  } else if (analogLeft >= lineThresholdLeft && analogRight <= lineThresholdRight){
     motorLeft->setSpeed(220);
     motorRight->setSpeed(0);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
-  } else if (analogLeft >= lineThreshold && analogRight >= lineThreshold) {
+  } else if (analogLeft >= lineThresholdLeft && analogRight >= lineThresholdRight) {
     Serial.println("Ultrasonic mode");
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   }
-  delay(10);
+  delay(10); 
 /*
   grabber.write(grabber_open_position);
   delay(2000);

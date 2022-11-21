@@ -123,7 +123,7 @@ void loop() {
     motorRight->setSpeed(225);
     motorLeft->run(FORWARD);
     motorRight->run(BACKWARD);
-    delay(1200); 
+    delay(875); 
     }else if (sensorLeft == 0 && sensorRight == 0 && sensorForwardRight== 1) {
     Serial.println("Line mode");
     motorLeft->setSpeed(220);
@@ -139,7 +139,7 @@ void loop() {
     motorRight->setSpeed(225);
     motorLeft->run(FORWARD);
     motorRight->run(BACKWARD);
-    delay(1200);
+    delay(875);
     } else {
       Serial.println("Line mode");
     motorLeft->setSpeed(220);
@@ -155,7 +155,7 @@ void loop() {
     motorRight->setSpeed(225);
     motorLeft->run(FORWARD);
     motorRight->run(BACKWARD);
-    delay(1200);
+    delay(875);
     } else {
       Serial.println("Line mode");
     motorLeft->setSpeed(20);
