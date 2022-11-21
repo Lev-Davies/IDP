@@ -38,19 +38,19 @@ void follow_line(){
 void turn_right_90(){
     delay(200);
     motorLeft->setSpeed(255);
-    motorRight->setSpeed(225);
+    motorRight->setSpeed(255);
     motorLeft->run(FORWARD);
     motorRight->run(BACKWARD);
-    delay(1200); 
+    delay(875); 
 }
 
 void turn_left_90(){
     delay(200);
     motorLeft->setSpeed(255);
-    motorRight->setSpeed(225);
+    motorRight->setSpeed(255);
     motorLeft->run(BACKWARD);
     motorRight->run(FORWARD);
-    delay(1200);    
+    delay(875);    
 }
 
 void tunnel_drive(){
