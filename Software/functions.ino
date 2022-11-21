@@ -1,3 +1,16 @@
+class LineSensor {
+    public:
+    const int pin;
+    const int threshold;
+
+    bool is_White(){
+        return analogRead(pin) <= threshold;
+    }
+    bool is_Black(){
+        return analogRead(pin) >= threshold;
+    }
+}
+
 void follow_line(){
   if (analogLeft <= lineThresholdLeft && analogRight <= lineThresholdRight) {
     motorLeft->setSpeed(255);
