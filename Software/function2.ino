@@ -11,6 +11,111 @@ class LineSensor {
     }
 }
 
+int foamRecognition() {
+  long pingTime, mm;
+  double ave_mm = 0; //average distance
+  int numberOfCylesForAverage = 4;
+  int foamType; // 1 or 0 - high or low
+  int DistanceThreshold = 400; // if the distance from sensor is below this value, it will be recognised as low density - if IR is used simultanously, this can be modified and compared with the result from IR sensor
+
+  for (int cycle = 0; cycle < numberOfCylesForAverage; cycle += 1){
+    digitalWrite(blockPingPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(blockPingPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(blockPingPin, LOW);
+
+    pingTime = pulseIn(blockReceivePin, HIGH);
+
+    mm = distance_in_millimeters(pingTime);
+    ave_mm = ave_mm + mm;
+    //Serial.print(mm);
+    //Serial.print("mm");
+    //Serial.println();
+    delay(20);     
+  }
+
+  ave_mm = ave_mm / numberOfCylesForAverage;
+
+  if (ave_mm <= DistanceThreshold){
+    foamType = 0; //low density
+    Serial.println("low");
+    Serial.println(ave_mm);
+  } else {
+    foamType = 1; //high density
+    Serial.println("high");
+    Serial.println(ave_mm);
+  }
+  return foamType;
+}
+
+void deposit(){
+    motorLeft->setSpeed(150);
+    motorRight->setSpeed(150);
+    motorLeft->run(FORWARD);
+    motorRight->run(FORWARD);
+    delay(2500);
+    motorLeft->run(RELEASE);
+    motorRight->run(RELEASE);
+    delay(1000);
+    grabber.write(grabber_open_position);
+    delay(2000);
+    motorLeft->setSpeed(150);
+    motorRight->setSpeed(150);
+    motorLeft->run(BACKWARD);
+    motorRight->run(BACKWARD);
+    delay(1000);
+    motorLeft->setSpeed(255);
+    motorRight->setSpeed(255);
+    motorLeft->run(FORWARD);
+    motorRight->run(BACKWARD);
+    delay(1750);
+    motorLeft->run(RELEASE);
+    motorRight->run(RELEASE);
+    grabber.write(grabber_closed_position);
+    delay(2000);
+    motorLeft->setSpeed(150);
+    motorRight->setSpeed(150);
+    motorLeft->run(FORWARD);
+    motorRight->run(FORWARD);
+    delay(1500);
+    motorLeft->run(RELEASE);
+    motorRight->run(RELEASE);
+}
+
+void collect(){
+      grabber.write(grabber_open_position);
+      delay(2000);
+      density = 1
+      for (int cycle = 0; cycle < 15; cycle += 1){
+        if (foamRecognition() == 0){
+          density = 0;
+        }
+        motorLeft->setSpeed(150);
+        motorRight->setSpeed(150);
+        motorLeft->run(FORWARD);
+        motorRight->run(FORWARD);
+        delay(100);  
+    }
+    motorLeft->run(RELEASE);
+    motorRight->run(RELEASE);
+    delay(1000);
+    grabber.write(grabber_closed_position);
+    delay(2000);
+    motorLeft->setSpeed(255);
+    motorRight->setSpeed(255);
+    motorLeft->run(FORWARD);
+    motorRight->run(BACKWARD);
+    delay(1750);
+    motorLeft->setSpeed(150);
+    motorRight->setSpeed(150);
+    motorLeft->run(FORWARD);
+    motorRight->run(FORWARD);
+    delay(1500);
+    motorLeft->run(RELEASE);
+    motorRight->run(RELEASE);
+}
+
 void follow_line(){
   if (Left.is_White() && Right.is_White()) {
     motorLeft->setSpeed(255);
