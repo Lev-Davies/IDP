@@ -77,6 +77,8 @@ void loop() {
   sensorForwardRight = 1 - digitalRead(sensorForwardRightPinDigital);
   String outputText = "Left: " + String(sensorLeft) + " Right: " + String(sensorRight) + " Forward Left: " + String(sensorForwardLeft) + " Forward Right: " + String(sensorForwardRight);
   Serial.println(outputText);
+  delay(500);
+  /*
   if (sensorLeft == 0 && sensorRight == 0) {
     motorLeft->setSpeed(255);
     motorRight->setSpeed(255);
@@ -97,7 +99,6 @@ void loop() {
     motorRight->run(RELEASE);
   }
   delay(10);
-/*
   grabber.write(grabber_open_position);
   delay(2000);
   grabber.write(grabber_closed_position);
