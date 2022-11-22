@@ -120,14 +120,14 @@ def collection_process(block_location):
         follow_path(8)
         node_type_5(9)
         grab_block()
-        determine_block_type()
+        block_type = determine_block_type()
         follow_path(10)
         node_type_2(11)
     elif block_location == 2:
         node_type_10(7)
         follow_path(19)
         grab_block()
-        determine_block_type()
+        block_type = determine_block_type()
         follow_path(19, "backward")
         node_type_3(7, "backward")
         node_type_2(7)
@@ -143,14 +143,15 @@ def collection_process(block_location):
         node_type_10(11)
         follow_path(20)
         grab_block()
-        determine_block_type()
+        block_type = determine_block_type()
         follow_path(20, "backward")
         node_type_10(11, "backward")
         node_type_2(11)
     else:
-        print("That is not a valid block location")
+        return "That is not a valid block location"
     follow_path(12)
     node_type_8(13)
+    return block_type
 
 def delivery_process(block_destination):
     """Navigate around the delivery half of the table"""
