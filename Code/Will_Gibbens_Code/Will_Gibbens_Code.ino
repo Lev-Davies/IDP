@@ -19,14 +19,14 @@ const int sensorLeftPinAnalog = A0;
 const int sensorRightPinAnalog =  A1;
 const int sensorForwardLeftPinAnalog = A2;
 const int sensorForwardRightPinAnalog = A3;
-const int blockPingPin = 6;
-const int blockReceivePin = 7;
+const int blockReceivePin = 6;
+const int blockPingPin = 7;
 const int grabberServoPin = 8;
-const int tunnelPingPin = 9;
-const int tunnelReceivePin = 10;
-const int orangeLedPin = 11;
+const int tunnelReceivePin = 9;
+const int tunnelPingPin = 10;
+const int redLedPin = 11;
 const int greenLedPin = 12;
-const int redLedPin = 13;
+const int orangeLedPin = 13;
 
 
 // Define constants
