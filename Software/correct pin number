@@ -1,0 +1,16 @@
+const int sensorLeftPinDigital = 2;
+const int sensorRightPinDigital =  3;
+const int sensorForwardLeftPinDigital = 4;
+const int sensorForwardRightPinDigital = 5;
+const int sensorLeftPinAnalog = A0;
+const int sensorRightPinAnalog =  A1;
+const int sensorForwardLeftPinAnalog = A2;
+const int sensorForwardRightPinAnalog = A3;
+const int blockPingPin = 7;
+const int blockReceivePin = 6;
+const int grabberServoPin = 8;
+const int tunnelPingPin = 10;
+const int tunnelReceivePin = 9;
+const int orangeLedPin = 13;
+const int greenLedPin = 12;
+const int redLedPin = 11;
