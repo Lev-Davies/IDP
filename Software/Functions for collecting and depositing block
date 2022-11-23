@@ -185,6 +185,80 @@ void deposit(){
 
 }
 
+/* grabber.write(-180);
+  Serial.print(-180);
+  Serial.println();
+  delay(2000);
+  grabber.write(-160);
+  Serial.print(-160);
+  Serial.println();
+  delay(2000);
+  grabber.write(-120);
+  Serial.print(-120);
+  Serial.println();
+  delay(2000);
+  grabber.write(-100);
+  Serial.print(-100);
+  Serial.println();
+  delay(2000);
+  grabber.write(-80);
+  Serial.print(-80);
+  Serial.println();
+  delay(2000);
+  grabber.write(-60);
+  Serial.print(-60);
+  Serial.println();
+  delay(2000);
+  grabber.write(-40);
+  Serial.print(-40);
+  Serial.println();
+  delay(2000);
+  grabber.write(-20);
+  Serial.print(-20);
+  Serial.println();
+  delay(2000);
+  grabber.write(0);
+  Serial.print(0);
+  Serial.println();
+  delay(2000);
+  grabber.write(20);
+  Serial.print(20);
+  Serial.println();
+  delay(1000);
+  grabber.write(40);
+  Serial.print(40);
+  Serial.println();
+  delay(2000);
+  grabber.write(60);
+  Serial.print(60);
+  Serial.println();
+  delay(2000);
+  grabber.write(80);
+  Serial.print(80);
+  Serial.println();
+  delay(2000);
+  grabber.write(100);
+  Serial.print(100);
+  Serial.println();
+  delay(2000);
+  grabber.write(120);
+  Serial.print(120);
+  Serial.println();
+  delay(2000);
+  grabber.write(140);
+  Serial.print(140);
+  Serial.println();
+  delay(2000);
+  grabber.write(160);
+  Serial.print(160);
+  Serial.println();
+  delay(2000);
+  grabber.write(180);
+  Serial.print(180);
+  Serial.println();
+  delay(2000);
+  */
+
 
 void loop() {
   // 0 = white, 1 = black
