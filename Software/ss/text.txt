@@ -1,1 +1,13 @@
 :)
+
+if ((currentMillis - previousMillis >= rampUpDelay) && (currentMillis - previousMillis <= 7000) {
+    // go up the ramp
+    RAMP_UP();
+    previousMillis = currentMillis;
+  } else if (currentMillis - previousMillis >= rampDownDelay){
+    // go down the ramp
+    previousMillis = currentMillis;
+    RAMP_DOWN();
+  } else {
+    follow_line)();
+  }
