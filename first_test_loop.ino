@@ -55,6 +55,10 @@ class LineSensor{
     pinMode(pin, INPUT);
   }
 
+  double read(){
+    return analogRead(pin);
+  }
+
   bool is_White(){
     return analogRead(pin) <= threshold;
   }
@@ -64,32 +68,39 @@ class LineSensor{
 };
 
 // Define all Line Sensors
-LineSensor Left(A3, 900);
-LineSensor Right(A2, 800);
-LineSensor WideLeft(A1, 800);
-LineSensor WideRight(A0, 800);
+LineSensor Left(A3, 600);
+LineSensor Right(A2, 250);
+LineSensor WideLeft(A1, 600);
+LineSensor WideRight(A0, 600);
 
 void follow_line(){
   if (Left.is_White() && Right.is_White()) {
-    Serial.println("Both White");
+    Serial.println(Left.read());
+    Serial.println(Right.read());
     motorLeft->setSpeed(230);
     motorRight->setSpeed(230);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   } else if (Left.is_White() && Right.is_Black()){ // or use the difference in analog reading to decide whether we need a left or right turn
-  Serial.println("Right Black");
+  //Serial.println("Right Black");
+    Serial.println(Left.read());
+    Serial.println(Right.read());
     motorLeft->setSpeed(20);
     motorRight->setSpeed(220);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   } else if (Left.is_Black() && Right.is_White()){
-    Serial.println("Left Black");
+    //Serial.println("Left Black");
+    Serial.println(Left.read());
+    Serial.println(Right.read());
     motorLeft->setSpeed(220);
     motorRight->setSpeed(20);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   } else if (Left.is_Black() && Right.is_Black()) {
-    Serial.println("Both Black");
+    //Serial.println("Both Black");
+    Serial.println(Left.read());
+    Serial.println(Right.read());
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   }
@@ -102,7 +113,7 @@ void turn_right_90(){
   motorRight->setSpeed(225);
   motorLeft->run(FORWARD);
   motorRight->run(BACKWARD);
-  delay(1200); 
+  delay(950); 
 }
 
 void turn_left_90(){
@@ -111,7 +122,7 @@ void turn_left_90(){
     motorRight->setSpeed(225);
     motorLeft->run(BACKWARD);
     motorRight->run(FORWARD);
-    delay(1200);    
+    delay(950);    
 }
 
 void tunnel_drive(){
@@ -213,8 +224,8 @@ void loop() {
     if(Left.is_White() || Right.is_White()){
       // Detects line
       // Delay until sensors over box line
-      delay(500);
       position = 1;
+      delay(1000);
     }
   } else if (position == 1){
     // Following line to first junction
@@ -225,6 +236,7 @@ void loop() {
     }
   } else if(position == 2){
     // Turning right at first junction
+    delay(250);
     turn_right_90();
     position = 3;
   } else if(position == 3){
