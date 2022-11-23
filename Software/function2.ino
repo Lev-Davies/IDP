@@ -11,6 +11,22 @@ class LineSensor {
     }
 }
 
+long flash_beacon(int delayDuration, long lastFlashTime){
+  // code for flashing the orange beacon when moving
+  long startTime = millis();
+  if (lastFlashTime == 0){
+    long lastFlashTime = millis();
+  }
+  while ((millis() - startTime) < delayDuration){ // only continue within this function for a specified duration
+    if ((millis()- lastFlashTime) > 250){
+      digitalWrite(orangeLedPin, (1- orangeLedState));
+      orangeLedState = (1- orangeLedState);
+      lastFlashTime = millis();
+    }
+  }
+  return lastFlashTime;
+}
+
 int foamRecognition() {
   long pingTime, mm;
   double ave_mm = 0; //average distance
@@ -55,30 +71,37 @@ void deposit(){
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
     delay(2500);
+    //long lastFlashTime = flash_beacon(2500, 0);
     motorLeft->run(RELEASE);
     motorRight->run(RELEASE);
     delay(1000);
+    //long lastFlashTime = flash_beacon(1000,lastFlashTime);
     grabber.write(grabber_open_position);
     delay(2000);
+    //long lastFlashTime = flash_beacon(2000,lastFlashTime);
     motorLeft->setSpeed(150);
     motorRight->setSpeed(150);
     motorLeft->run(BACKWARD);
     motorRight->run(BACKWARD);
     delay(1000);
+    //long lastFlashTime = flash_beacon(1000,lastFlashTime);
     motorLeft->setSpeed(255);
     motorRight->setSpeed(255);
     motorLeft->run(FORWARD);
     motorRight->run(BACKWARD);
     delay(1750);
+    //long lastFlashTime = flash_beacon(1750,lastFlashTime);
     motorLeft->run(RELEASE);
     motorRight->run(RELEASE);
     grabber.write(grabber_closed_position);
     delay(2000);
+    //long lastFlashTime = flash_beacon(2000,lastFlashTime);
     motorLeft->setSpeed(150);
     motorRight->setSpeed(150);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
     delay(1500);
+    //long lastFlashTime = flash_beacon(1500,lastFlashTime);
     motorLeft->run(RELEASE);
     motorRight->run(RELEASE);
 }
@@ -86,7 +109,8 @@ void deposit(){
 void collect(){
       grabber.write(grabber_open_position);
       delay(2000);
-      density = 1
+      //long lastFlashTime = flash_beacon(2000,0);
+      int density = 1
       for (int cycle = 0; cycle < 15; cycle += 1){
         if (foamRecognition() == 0){
           density = 0;
@@ -95,23 +119,28 @@ void collect(){
         motorRight->setSpeed(150);
         motorLeft->run(FORWARD);
         motorRight->run(FORWARD);
-        delay(100);  
+        delay(100);
+        //long lastFlashTime = flash_beacon(100,lastFlashTime);  
     }
     motorLeft->run(RELEASE);
     motorRight->run(RELEASE);
     delay(1000);
+    //long lastFlashTime = flash_beacon(1000,lastFlashTime);
     grabber.write(grabber_closed_position);
     delay(2000);
+    //long lastFlashTime = flash_beacon(2000,lastFlashTime);
     motorLeft->setSpeed(255);
     motorRight->setSpeed(255);
     motorLeft->run(FORWARD);
     motorRight->run(BACKWARD);
     delay(1750);
+    //long lastFlashTime = flash_beacon(1750,lastFlashTime);
     motorLeft->setSpeed(150);
     motorRight->setSpeed(150);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
     delay(1500);
+    //long lastFlashTime = flash_beacon(1500,lastFlashTime);
     motorLeft->run(RELEASE);
     motorRight->run(RELEASE);
 }
@@ -142,20 +171,24 @@ void follow_line(){
 
 void turn_right_90(){
     delay(200);
+    //long lastFlashTime = flash_beacon(200,0);
     motorLeft->setSpeed(255);
     motorRight->setSpeed(225);
     motorLeft->run(FORWARD);
     motorRight->run(BACKWARD);
-    delay(1200); 
+    delay(1200);
+    //long lastFlashTime = flash_beacon(1200,lastFlashTime);
 }
 
 void turn_left_90(){
     delay(200);
+    //long lastFlashTime = flash_beacon(200,0);
     motorLeft->setSpeed(255);
     motorRight->setSpeed(225);
     motorLeft->run(BACKWARD);
     motorRight->run(FORWARD);
-    delay(1200);    
+    delay(1200);
+    //long lastFlashTime = flash_beacon(1200,lastFlashTime);   
 }
 
 void tunnel_drive(){
