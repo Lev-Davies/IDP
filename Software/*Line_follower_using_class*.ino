@@ -31,10 +31,10 @@ class LineSensor{
 };
 
 // Define all Line Sensors
-LineSensor Left(A3, 600);
-LineSensor Right(A2, 600);
-LineSensor WideLeft(A1, 600);
-LineSensor WideRight(A0, 600);
+LineSensor Left(A3, 900);
+LineSensor Right(A2, 800);
+LineSensor WideLeft(A1, 900);
+LineSensor WideRight(A0, 900);
 
 void follow_line(){
   if (Left.is_White() && Right.is_White()) {
@@ -60,7 +60,56 @@ void follow_line(){
   delay(10);
 }
 
-// Define pin numbers
+void turn_right_90(){
+    delay(200);
+    motorLeft->setSpeed(255);
+    motorRight->setSpeed(225);
+    motorLeft->run(FORWARD);
+    motorRight->run(BACKWARD);
+    delay(1200); 
+}
+
+void turn_left_90(){
+    delay(200);
+    motorLeft->setSpeed(255);
+    motorRight->setSpeed(225);
+    motorLeft->run(BACKWARD);
+    motorRight->run(FORWARD);
+    delay(1200);    
+}
+
+void tunnel_drive(){
+    //controlling motor
+    P = target - mm;
+    I = prev_I + P*(current_time-prev_time);
+    error = kp*P + ki*I;
+    prev_time = current_time;
+    prev_I = I;
+
+    double speedLeft = med_speed + error;
+    double speedRight = med_speed - error;
+
+    if(speedLeft > 255){
+      speedLeft = 255;
+    }
+    if(speedLeft < 0){
+      speedLeft = 0;
+    }
+     if(speedRight > 255){
+      speedRight = 255;
+    }
+    if(speedRight < 0){
+      speedRight = 0;
+    }
+    motorLeft->setSpeed(speedLeft);
+    motorRight->setSpeed(speedRight);
+}
+
+// Define all pin numbers (updated for prototype board)
+const int sensorLeftPinDigital = 2;
+const int sensorRightPinDigital =  3;
+const int sensorForwardLeftPinDigital = 4;
+const int sensorForwardRightPinDigital = 5;
 const int blockReceivePin = 6;
 const int blockPingPin = 7;
 const int grabberServoPin = 8;
@@ -138,5 +187,9 @@ void loop() {
    Serial.print("mm");
    Serial.println();
 
-  follow_line();
+  if(Left.is_Black() && Right.is_Black())){
+    tunnel_drive();
+  } else {
+    follow_line();
+  } 
 }
