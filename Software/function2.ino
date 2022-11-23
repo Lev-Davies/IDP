@@ -17,44 +17,6 @@ class LineSensor{
   }
 };
 
-int foamRecognition() {
-  long pingTime, mm;
-  double ave_mm = 0; //average distance
-  int numberOfCylesForAverage = 4;
-  int foamType; // 1 or 0 - high or low
-  int DistanceThreshold = 400; // if the distance from sensor is below this value, it will be recognised as low density - if IR is used simultanously, this can be modified and compared with the result from IR sensor
-
-  for (int cycle = 0; cycle < numberOfCylesForAverage; cycle += 1){
-    digitalWrite(blockPingPin, LOW);
-    delayMicroseconds(2);
-    digitalWrite(blockPingPin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(blockPingPin, LOW);
-
-    pingTime = pulseIn(blockReceivePin, HIGH);
-
-    mm = distance_in_millimeters(pingTime);
-    ave_mm = ave_mm + mm;
-    //Serial.print(mm);
-    //Serial.print("mm");
-    //Serial.println();
-    delay(20);     
-  }
-
-  ave_mm = ave_mm / numberOfCylesForAverage;
-
-  if (ave_mm <= DistanceThreshold){
-    foamType = 0; //low density
-    Serial.println("low");
-    Serial.println(ave_mm);
-  } else {
-    foamType = 1; //high density
-    Serial.println("high");
-    Serial.println(ave_mm);
-  }
-  return foamType;
-}
-
 void deposit(){
     motorLeft->setSpeed(150);
     motorRight->setSpeed(150);
