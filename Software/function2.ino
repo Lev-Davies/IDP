@@ -1,15 +1,21 @@
-class LineSensor {
-    public:
-    const int pin;
-    const int threshold;
+class LineSensor{
+  private:
+   int pin;
+   int threshold;
+  public:
+  LineSensor(int p, int t){
+    threshold = t;
+    pin = p;
+    pinMode(pin, INPUT);
+  }
 
-    bool is_White(){
-        return analogRead(pin) <= threshold;
-    }
-    bool is_Black(){
-        return analogRead(pin) >= threshold;
-    }
-}
+  bool is_White(){
+    return analogRead(pin) <= threshold;
+  }
+  bool is_Black(){
+    return analogRead(pin) >= threshold;
+  }
+};
 
 int foamRecognition() {
   long pingTime, mm;
