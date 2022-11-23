@@ -44,7 +44,7 @@ int foamRecognition() {
     digitalWrite(blockPingPin, LOW);
     delayMicroseconds(2);
     digitalWrite(blockPingPin, HIGH);
-    delayMicroseconds(10);
+    delayMicroseconds(10);  
     digitalWrite(blockPingPin, LOW);
 
     pingTime = pulseIn(blockReceivePin, HIGH);
