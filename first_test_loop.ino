@@ -66,27 +66,30 @@ class LineSensor{
 // Define all Line Sensors
 LineSensor Left(A3, 900);
 LineSensor Right(A2, 800);
-LineSensor WideLeft(A1, 900);
-LineSensor WideRight(A0, 900);
+LineSensor WideLeft(A1, 800);
+LineSensor WideRight(A0, 800);
 
 void follow_line(){
   if (Left.is_White() && Right.is_White()) {
-    motorLeft->setSpeed(255);
-    motorRight->setSpeed(255);
+    Serial.println("Both White");
+    motorLeft->setSpeed(230);
+    motorRight->setSpeed(230);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   } else if (Left.is_White() && Right.is_Black()){ // or use the difference in analog reading to decide whether we need a left or right turn
+  Serial.println("Right Black");
     motorLeft->setSpeed(20);
     motorRight->setSpeed(220);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   } else if (Left.is_Black() && Right.is_White()){
+    Serial.println("Left Black");
     motorLeft->setSpeed(220);
     motorRight->setSpeed(20);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   } else if (Left.is_Black() && Right.is_Black()) {
-    Serial.println("Ultrasonic mode");
+    Serial.println("Both Black");
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   }
@@ -94,12 +97,12 @@ void follow_line(){
 }
 
 void turn_right_90(){
-    delay(200);
-    motorLeft->setSpeed(255);
-    motorRight->setSpeed(225);
-    motorLeft->run(FORWARD);
-    motorRight->run(BACKWARD);
-    delay(1200); 
+  delay(200);
+  motorLeft->setSpeed(255);
+  motorRight->setSpeed(225);
+  motorLeft->run(FORWARD);
+  motorRight->run(BACKWARD);
+  delay(1200); 
 }
 
 void turn_left_90(){
@@ -186,49 +189,53 @@ void loop() {
   // establish variables for duration of the ping, and the distance result
   // in inches and centimeters:
   // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
-   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-   digitalWrite(tunnelPingPin, LOW);
-   delayMicroseconds(2);
-   digitalWrite(tunnelPingPin, HIGH);
-   delayMicroseconds(5);
-   digitalWrite(tunnelPingPin, LOW);
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  digitalWrite(tunnelPingPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(tunnelPingPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(tunnelPingPin, LOW);
 
-   pingTime = pulseIn(tunnelReceivePin, HIGH);
+  pingTime = pulseIn(tunnelReceivePin, HIGH);
 
-   mm = distance_in_millimeters(pingTime);
-   Serial.print(mm);
-   Serial.print("mm");
-   Serial.println();
+  mm = distance_in_millimeters(pingTime);
+  Serial.print(mm);
+  Serial.print("mm");
+  Serial.println();
+  Serial.println(position);
 
-  if(position = 0){
+  if(position == 0){
     // Moving straight in the starting box
     motorLeft->setSpeed(255);
     motorRight->setSpeed(255);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
-
     if(Left.is_White() || Right.is_White()){
-        // Detects line
-        position = 1;
+      // Detects line
+      // Delay until sensors over box line
+      delay(500);
+      position = 1;
     }
-  } else if(position = 1){
+  } else if (position == 1){
     // Following line to first junction
-    follow_line();
     if(WideRight.is_White() || WideLeft.is_White()){
-        position = 2;
+      position = 2;
+    } else {
+      follow_line();
     }
-  } else if(position = 2){
+  } else if(position == 2){
     // Turning right at first junction
     turn_right_90();
     position = 3;
-  } else if(position = 3){
+  } else if(position == 3){
     // Driving past red junction
-    follow_line();
     if(WideRight.is_White()){
         position = 4;
         previousMillis = currentMillis;
+    } else {
+      follow_line();
     }
-  } else if(position = 4){
+  } else if(position == 4){
    if (currentMillis - previousMillis >= rampUpDelay && currentMillis - previousMillis <= 7000) {
      // go up the ramp
      RAMP_UP();
@@ -244,19 +251,21 @@ void loop() {
     if(WideLeft.is_White()){
         position = 5;
     }  
-  } else if(position = 5){
+  } else if(position == 5){
     // Driving from junction A to B
-    follow_line();
     if(WideRight.is_White() || WideLeft.is_White()){
         position = 6;
+    } else {
+      follow_line();
     }
-  } else if(position = 6){
+  } else if(position == 6){
     // Driving from junction B to C
-    follow_line();
     if(WideLeft.is_White()){
         position = 7;
+    } else {
+      follow_line();
     }
-  } else if(position = 7){
+  } else if(position == 7){
     if(mm < 100){
         tunnel_drive();
     } else if(WideRight.is_White()){
@@ -264,7 +273,7 @@ void loop() {
     } else {
         follow_line();
     }
-  } else if(position = 8){
+  } else if(position == 8){
     if(WideRight.is_White()){
         turn_right_90();
         motorLeft->setSpeed(255);
@@ -276,7 +285,7 @@ void loop() {
     } else {
         follow_line();
     }
-  } else if(position = 9){
+  } else if(position == 9){
     motorLeft->run(RELEASE);
     motorRight->run(RELEASE);
   }
