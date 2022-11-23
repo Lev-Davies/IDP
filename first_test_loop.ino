@@ -24,6 +24,8 @@ unsigned long previousMillis = 0;
 const long rampUpDelay = 6000;
 const long rampDownDelay = 11000;
 
+// Right motor faster than left
+int left_offset = 20;
 
 // Define tunnel driving variables
 const int kp = 3;
@@ -69,7 +71,7 @@ class LineSensor{
 
 // Define all Line Sensors
 LineSensor Left(A3, 600);
-LineSensor Right(A2, 250);
+LineSensor Right(A2, 600);
 LineSensor WideLeft(A1, 600);
 LineSensor WideRight(A0, 600);
 
@@ -77,7 +79,8 @@ void follow_line(){
   if (Left.is_White() && Right.is_White()) {
     Serial.println(Left.read());
     Serial.println(Right.read());
-    motorLeft->setSpeed(230);
+    Serial.println(WideRight.read());
+    motorLeft->setSpeed(230 + left_offset);
     motorRight->setSpeed(230);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
@@ -85,6 +88,7 @@ void follow_line(){
   //Serial.println("Right Black");
     Serial.println(Left.read());
     Serial.println(Right.read());
+    Serial.println(WideRight.read());
     motorLeft->setSpeed(20);
     motorRight->setSpeed(220);
     motorLeft->run(FORWARD);
@@ -93,6 +97,7 @@ void follow_line(){
     //Serial.println("Left Black");
     Serial.println(Left.read());
     Serial.println(Right.read());
+    Serial.println(WideRight.read());
     motorLeft->setSpeed(220);
     motorRight->setSpeed(20);
     motorLeft->run(FORWARD);
@@ -101,6 +106,7 @@ void follow_line(){
     //Serial.println("Both Black");
     Serial.println(Left.read());
     Serial.println(Right.read());
+    Serial.println(WideRight.read());
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
   }
@@ -113,7 +119,7 @@ void turn_right_90(){
   motorRight->setSpeed(225);
   motorLeft->run(FORWARD);
   motorRight->run(BACKWARD);
-  delay(950); 
+  delay(1000); 
 }
 
 void turn_left_90(){
@@ -218,14 +224,14 @@ void loop() {
   if(position == 0){
     // Moving straight in the starting box
     motorLeft->setSpeed(255);
-    motorRight->setSpeed(255);
+    motorRight->setSpeed(235);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
     if(Left.is_White() || Right.is_White()){
       // Detects line
       // Delay until sensors over box line
       position = 1;
-      delay(1000);
+      delay(1050);
     }
   } else if (position == 1){
     // Following line to first junction
@@ -243,6 +249,7 @@ void loop() {
     // Driving past red junction
     if(WideRight.is_White()){
         position = 4;
+        digitalWrite(redLedPin, 1);
         previousMillis = currentMillis;
     } else {
       follow_line();
