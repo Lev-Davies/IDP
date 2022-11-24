@@ -42,6 +42,9 @@ const int left_offset = 20; // Amount to increase left motor speed by over the r
 long progStartTime = millis();
 int position = 999;
 unsigned long previousMillis = 0;
+int orangeLedState;
+long lastFlashTime = progStartTime;
+long expectedSectionDuration;
 
 class LineSensor{
   private:
@@ -73,35 +76,22 @@ LineSensor WideLeft(A1, 600);
 LineSensor WideRight(A0, 600);
 
 void follow_line(){
+  //Serial.println("Wide Left: " + String(WideLeft.read()) + " Left: " + String(Left.read()) + " Right: " + String(Right.read()) + " Wide Right: " + String(WideRight.read()));
   if (Left.is_White() && Right.is_White()) {
-    String outputText = "Wide Left: " + String(WideLeft.read()) + " Left: " + String(Left.read()) + " Right: " + String(Right.read()) + " Wide Right: " + String(WideRight.read());
-    //Serial.println(outputText);
     motorLeft->setSpeed(230 + left_offset);
     motorRight->setSpeed(230);
-    motorLeft->run(FORWARD);
-    motorRight->run(FORWARD);
   } else if (Left.is_White() && Right.is_Black()){ // or use the difference in analog reading to decide whether we need a left or right turn
-    String outputText = "Wide Left: " + String(WideLeft.read()) + " Left: " + String(Left.read()) + " Right: " + String(Right.read()) + " Wide Right: " + String(WideRight.read());
-    //Serial.println(outputText);
     motorLeft->setSpeed(20);
     motorRight->setSpeed(220);
-    motorLeft->run(FORWARD);
-    motorRight->run(FORWARD);
   } else if (Left.is_Black() && Right.is_White()){
-    String outputText = "Wide Left: " + String(WideLeft.read()) + " Left: " + String(Left.read()) + " Right: " + String(Right.read()) + " Wide Right: " + String(WideRight.read());
-    //Serial.println(outputText);
     motorLeft->setSpeed(220);
     motorRight->setSpeed(20);
-    motorLeft->run(FORWARD);
-    motorRight->run(FORWARD);
   } else if (Left.is_Black() && Right.is_Black()) {
-    String outputText = "Wide Left: " + String(WideLeft.read()) + " Left: " + String(Left.read()) + " Right: " + String(Right.read()) + " Wide Right: " + String(WideRight.read());
-    //Serial.println(outputText);
     motorLeft->setSpeed(230 + left_offset);
     motorRight->setSpeed(230);
-    motorLeft->run(FORWARD);
-    motorRight->run(FORWARD);
   }
+  motorLeft->run(FORWARD);
+  motorRight->run(FORWARD);
 }
 
 void turn_right_90(){
@@ -148,16 +138,16 @@ void tunnel_drive(){
     double speedLeft = med_speed + error;
     double speedRight = med_speed - error;
     if(speedLeft > 255){speedLeft = 255;}
-    if(speedLeft < 0){speedLeft = 0;}
+    else if(speedLeft < 0){speedLeft = 0;}
     if(speedRight > 255){speedRight = 255;}
-    if(speedRight < 0){speedRight = 0;}
+    else if(speedRight < 0){speedRight = 0;}
     motorLeft->setSpeed(speedLeft);
     motorRight->setSpeed(speedRight);
 }
 
 void ramp_up(){
     motorLeft->setSpeed(255);
-    motorRight->setSpeed(225);
+    motorRight->setSpeed(255 - left_offset);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
     delay(2000); 
@@ -172,9 +162,12 @@ void ramp_down(){
 }
 
 
-//
-//
-//
+
+
+
+
+
+
 
 
 void setup() {
@@ -192,7 +185,7 @@ void setup() {
   AFMS.begin();
   motorLeft->setSpeed(200);
   motorRight->setSpeed(200 - left_offset);
-  grabber.attach(grabberServoPin);  // attaches the servo on pin 9 to the servo object
+  grabber.attach(grabberServoPin);
 }
 
 
@@ -217,12 +210,20 @@ void loop() {
 
   // Check for button to be pressed
   if (digitalRead(buttonPin) == HIGH && (currentMillis - progStartTime) > 1000){
-    motorLeft->run(RELEASE);
-    motorRight->run(RELEASE);
     position = 999;
   }
 
+  // Flash the orange beacon while running
+  if ((currentMillis - lastFlashTime) > 250){
+    digitalWrite(orangeLedPin, (1 - orangeLedState));
+    orangeLedState = (1 - orangeLedState);
+    lastFlashTime = currentMillis;
+  }
+
   if(position == 999){ // Wait for button press before starting
+    motorLeft->run(RELEASE);
+    motorRight->run(RELEASE);
+    digitalWrite(orangeLedPin, LOW);
     delay(1000);
     while (digitalRead(buttonPin) == LOW){
       Serial.println("Waiting for button press to start");
@@ -230,6 +231,7 @@ void loop() {
     }
     progStartTime = millis();
     position = 0;
+    previousMillis = currentMillis;
   }
 
   else if(position == 0){  // Moving straight in the starting box
@@ -239,12 +241,14 @@ void loop() {
     motorRight->run(FORWARD);
     if(WideLeft.is_White() || WideRight.is_White()){// Reaches perpendicular line
       position = 1; // move on to next position
+      previousMillis = currentMillis;
     }
   }
   
   else if (position == 1){ // Crossing first line to leave starting box
     if(WideLeft.is_Black() && WideRight.is_Black()){// Has crossed perpendicular line
       position = 2; // move on to next position
+      previousMillis = currentMillis;
     }
   }
   
@@ -261,18 +265,28 @@ void loop() {
     if((currentMillis - previousMillis) > 250){
       turn_right_90();
       position = 4; // move on to next position
+      previousMillis = currentMillis;
     }
   }
   
   else if(position == 4){ // Following straight white line
     if(WideRight.is_White()){
-        position = 5; // move on to next position
-        digitalWrite(redLedPin, 1);
-        previousMillis = currentMillis;
+      position = 5; // move on to next position
+      previousMillis = currentMillis;
     } else {
       follow_line();
     }
-  } else if(position == 4){
+  }
+  else if(position == 5){ // Cross the junction leading to the red box
+    if (WideRight.is_Black()){
+      position = 6; // move on to next position
+      previousMillis = currentMillis;
+    } else {
+      follow_line();
+    }
+  }
+
+  else if(position == 6){ // follow the path across the ramp
    if (currentMillis - previousMillis >= rampUpDelay && currentMillis - previousMillis <= 7000) {
      // go up the ramp
      ramp_up();
@@ -286,45 +300,113 @@ void loop() {
     // Approaching next junction
     previousMillis = currentMillis;
     if(WideLeft.is_White()){
-        position = 5;
+        position = 7; // move on to next position
+        previousMillis = currentMillis;
     }  
-  } else if(position == 5){
-    // Driving from junction A to B
+  }
+
+  else if (position == 7){ // cross the junction after the ramp
+    if (WideLeft.is_Black()) {
+      position = 8; // move on to next position
+      previousMillis = currentMillis;
+    } else {
+      follow_line();
+    }
+  }
+  else if(position == 8){ // Driving from junction 7 to the cross
     if(WideRight.is_White() || WideLeft.is_White()){
-        position = 6;
+        position = 9; // move on to next position
+        previousMillis = currentMillis;
     } else {
       follow_line();
     }
-  } else if(position == 6){
-    // Driving from junction B to C
-    if(WideLeft.is_White()){
-        position = 7;
+  }
+  
+  else if(position == 9){ // Crossing the cross
+    if(WideLeft.is_Black() || WideRight.is_Black()){
+        position = 10; // move on to next position
+        previousMillis = currentMillis;
     } else {
       follow_line();
     }
-  } else if(position == 7){
-    if(mm < 100){
+  }
+  
+  else if (position == 10) { // Follow the straight line after the cross
+    if (WideRight.is_White()){ 
+      position = 11; // move on to next position
+      previousMillis = currentMillis;
+    } else {
+      follow_line();
+    }
+  }
+
+  else if (position == 11) { // Cross the junction before the tunnel
+    if (WideRight.is_Black()){ 
+      position = 12; // move on to next position
+      previousMillis = currentMillis;
+    } else {
+      follow_line();
+    }
+  }
+
+  else if(position == 12){ // Follow the path under the tunnel
+    if(Left.is_Black() && Right.is_Black()){
         tunnel_drive();
     } else if(WideRight.is_White()){
-        position = 8;
+        position = 15; // move on to next position
+        previousMillis = currentMillis;
     } else {
         follow_line();
     }
-  } else if(position == 8){
-    if(WideRight.is_White()){
-        turn_right_90();
-        motorLeft->setSpeed(255);
-        motorRight->setSpeed(255);
-        motorLeft->run(FORWARD);
-        motorRight->run(FORWARD);
-        delay(500);
-        position = 9;
+  }
+
+  else if(position == 15) {
+    if (WideRight.is_Black()) {
+      position = 16; // move on to next position
+      previousMillis = currentMillis;
     } else {
-        follow_line();
+      follow_line();
     }
-  } else if(position == 9){
-    motorLeft->run(RELEASE);
-    motorRight->run(RELEASE);
+  }
+  
+  else if (position == 16) {
+    if (WideRight.is_White()) {
+      position = 17; // move on to next position
+      previousMillis = currentMillis;
+    } else {
+      follow_line();
+    }
+  }
+
+  else if(position == 17){ // Turning right back into home
+    if((currentMillis - previousMillis) > 250){
+      turn_right_90();
+      position = 18; // move on to next position
+      previousMillis = currentMillis;
+    }
+  }
+
+  else if (position == 18){ // Last little line segment
+    if (WideLeft.is_White() || WideRight.is_White()) {
+      position = 19; // move on to next position
+      previousMillis = currentMillis;
+    } else {
+      follow_line();
+    }
+  }
+  
+  else if (position == 19){ // Cross final perpendicular line
+    if (WideLeft.is_Black() && WideRight.is_Black()) {
+      motorLeft->setSpeed(255);
+      motorRight->setSpeed(255 - left_offset);
+      motorLeft->run(FORWARD);
+      motorRight->run(FORWARD);
+      delay(1000);
+      motorLeft->run(RELEASE);
+      motorRight->run(RELEASE);
+      position = 999; // Finish
+      previousMillis = currentMillis;
+    }
   }
   delay(2);
 }
