@@ -34,10 +34,10 @@ const int med_speed = 160;
 // Define constants
 const int grabber_closed_position = 80;
 const int grabber_open_position = 140;
-const long rampUpDelay = 6000;
+const long rampUpDelay = 5000;
 const long rampDownDelay = 9000;
 const int left_offset = 20; // Amount to increase left motor speed by over the right to go straight
-const int robotSpeed = 10; // centimeters per second
+const int robotSpeed = 0.01; // centimetres per millisecond
 
 // Initiate variables
 long progStartTime = millis();
@@ -158,7 +158,7 @@ void ramp_up(){
   motorRight->setSpeed(255 - left_offset);
   motorLeft->run(FORWARD);
   motorRight->run(FORWARD);
-  delay(8000);
+  delay(4000);
 }
 
 void ramp_down(){
@@ -300,19 +300,18 @@ void loop() {
   else if(position == 6){ // follow the path across the ramp
     expectedSectionDuration = 232/robotSpeed;
     if (currentMillis - previousMillis >= rampUpDelay && currentMillis - previousMillis <= 7000) {
-      // go up the ramp
       ramp_up();
     } else if (currentMillis - previousMillis >= rampDownDelay && currentMillis - previousMillis <= 13000){
-    // go down the ramp
-    ramp_down();
+      ramp_down();
     } else {
     follow_line();
     }
-    // Insert ramp function
     // Approaching next junction
-    if(WideLeft.is_White() && (Left.is_White() || Right.is_White()) && (currentMillis - previousMillis > 0.6 * expectedSectionDuration)){
+    if(WideLeft.is_White() && (currentMillis - previousMillis > 0.6 * expectedSectionDuration)){
+      if (Left.is_White() || Right.is_White()){
         position = 7; // move on to next position
         previousMillis = currentMillis;
+      }
     }  
   }
 
