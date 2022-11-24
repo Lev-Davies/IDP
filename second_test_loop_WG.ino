@@ -37,6 +37,7 @@ const int grabber_open_position = 140;
 const long rampUpDelay = 6000;
 const long rampDownDelay = 11000;
 const int left_offset = 20; // Amount to increase left motor speed by over the right to go straight
+const int robotSpeed = 10; // centimeters per second
 
 // Initiate variables
 long progStartTime = millis();
@@ -253,7 +254,8 @@ void loop() {
   }
   
   else if (position == 2){ // Moving along the first short white line
-    if(WideRight.is_White() || WideLeft.is_White()){
+    expectedSectionDuration = 16/robotSpeed;
+    if((WideRight.is_White() || WideLeft.is_White()) && (currentMillis - previousMillis > 0.8 * expectedSectionDuration)){
       position = 3; // move on to next position
       previousMillis = currentMillis;
     } else {
@@ -270,7 +272,8 @@ void loop() {
   }
   
   else if(position == 4){ // Following straight white line
-    if(WideRight.is_White()){
+    expectedSectionDuration = 68/robotSpeed;
+    if(WideRight.is_White()  && (currentMillis - previousMillis > 0.8 * expectedSectionDuration)){
       position = 5; // move on to next position
       previousMillis = currentMillis;
     } else {
@@ -287,9 +290,10 @@ void loop() {
   }
 
   else if(position == 6){ // follow the path across the ramp
-   if (currentMillis - previousMillis >= rampUpDelay && currentMillis - previousMillis <= 7000) {
-     // go up the ramp
-     ramp_up();
+    expectedSectionDuration = 232/robotSpeed;
+    if (currentMillis - previousMillis >= rampUpDelay && currentMillis - previousMillis <= 7000) {
+      // go up the ramp
+      ramp_up();
     } else if (currentMillis - previousMillis >= rampDownDelay && currentMillis - previousMillis <= 13000){
     // go down the ramp
     ramp_down();
@@ -298,8 +302,7 @@ void loop() {
     }
     // Insert ramp function
     // Approaching next junction
-    previousMillis = currentMillis;
-    if(WideLeft.is_White()){
+    if(WideLeft.is_White() && (currentMillis - previousMillis > 0.6 * expectedSectionDuration)){
         position = 7; // move on to next position
         previousMillis = currentMillis;
     }  
@@ -314,7 +317,8 @@ void loop() {
     }
   }
   else if(position == 8){ // Driving from junction 7 to the cross
-    if(WideRight.is_White() || WideLeft.is_White()){
+  expectedSectionDuration = 38/robotSpeed;
+    if((WideRight.is_White() || WideLeft.is_White()) && (currentMillis - previousMillis > 0.6 * expectedSectionDuration)){
         position = 9; // move on to next position
         previousMillis = currentMillis;
     } else {
@@ -323,7 +327,7 @@ void loop() {
   }
   
   else if(position == 9){ // Crossing the cross
-    if(WideLeft.is_Black() || WideRight.is_Black()){
+    if(WideLeft.is_Black() && WideRight.is_Black()){
         position = 10; // move on to next position
         previousMillis = currentMillis;
     } else {
@@ -332,7 +336,8 @@ void loop() {
   }
   
   else if (position == 10) { // Follow the straight line after the cross
-    if (WideRight.is_White()){ 
+  expectedSectionDuration = 38/robotSpeed;
+    if (WideLeft.is_White() && (currentMillis - previousMillis > 0.6 * expectedSectionDuration)){ 
       position = 11; // move on to next position
       previousMillis = currentMillis;
     } else {
@@ -341,7 +346,7 @@ void loop() {
   }
 
   else if (position == 11) { // Cross the junction before the tunnel
-    if (WideRight.is_Black()){ 
+    if (WideLeft.is_Black()){ 
       position = 12; // move on to next position
       previousMillis = currentMillis;
     } else {
@@ -370,7 +375,8 @@ void loop() {
   }
   
   else if (position == 16) {
-    if (WideRight.is_White()) {
+  expectedSectionDuration = 68/robotSpeed;
+    if (WideRight.is_White() && (currentMillis - previousMillis > 0.6 * expectedSectionDuration)) {
       position = 17; // move on to next position
       previousMillis = currentMillis;
     } else {
@@ -387,7 +393,8 @@ void loop() {
   }
 
   else if (position == 18){ // Last little line segment
-    if (WideLeft.is_White() || WideRight.is_White()) {
+  expectedSectionDuration = 16/robotSpeed;
+    if ((WideLeft.is_White() || WideRight.is_White()) && (currentMillis - previousMillis > 0.6 * expectedSectionDuration)) {
       position = 19; // move on to next position
       previousMillis = currentMillis;
     } else {
