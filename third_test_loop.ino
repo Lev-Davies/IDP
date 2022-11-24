@@ -37,7 +37,7 @@ const int grabber_open_position = 140;
 const long rampUpDelay = 7000;
 const long rampDownDelay = 9000;
 const int left_offset = 20; // Amount to increase left motor speed by over the right to go straight
-const int robotSpeed = 1; // centimetres per millisecond
+const int robotSpeed = 10; // centimetres per millisecond
 
 // Initiate variables
 long progStartTime = millis();
@@ -88,8 +88,8 @@ void follow_line(){
     motorLeft->setSpeed(220);
     motorRight->setSpeed(20);
   } else if (Left.is_Black() && Right.is_Black()) {
-    motorLeft->setSpeed(230 + left_offset);
-    motorRight->setSpeed(230);
+    motorLeft->setSpeed(255);
+    motorRight->setSpeed(255);
  } else if (Left.is_Black() && Right.is_Black() && WideLeft.is_White()) {
     motorLeft->setSpeed(100);
     motorRight->setSpeed(230);
@@ -107,7 +107,7 @@ void turn_right_90(){
   motorRight->setSpeed(255 - left_offset);
   motorLeft->run(FORWARD);
   motorRight->run(BACKWARD);
-  delay(1000); 
+  delay(1100); 
 }
 
 void turn_left_90(){
@@ -151,25 +151,6 @@ void tunnel_drive(){
     motorLeft->setSpeed(speedLeft);
     motorRight->setSpeed(speedRight);
 }
-
-void ramp_up(){
-  Serial.println("ramp up");
-  motorLeft->setSpeed(150 + left_offset);
-  motorRight->setSpeed(150);
-  motorLeft->run(FORWARD);
-  motorRight->run(FORWARD);
-  delay(4000);
-}
-
-void ramp_down(){
-  Serial.println("ramp down");
-  motorLeft->setSpeed(150);
-  motorRight->setSpeed(150);
-  motorLeft->run(FORWARD);
-  motorRight->run(FORWARD);
-  delay(2000);
-}
-
 
 
 
@@ -235,7 +216,7 @@ void loop() {
     digitalWrite(orangeLedPin, LOW);
     delay(1000);
     while (digitalRead(buttonPin) == LOW){
-      Serial.println("Waiting for button press to start");
+      Serial.println("Wide Left: " + String(WideLeft.read()) + " Left: " + String(Left.read()) + " Right: " + String(Right.read()) + " Wide Right: " + String(WideRight.read()));
       delay(10);
     }
     progStartTime = millis();
@@ -248,7 +229,7 @@ void loop() {
     motorRight->setSpeed(255 - left_offset);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
-    if(WideLeft.is_White() || WideRight.is_White()){// Reaches perpendicular line
+    if(WideLeft.is_White() && WideRight.is_White()){// Reaches perpendicular line
       position = 1; // move on to next position
       previousMillis = currentMillis;
     }
@@ -303,20 +284,15 @@ void loop() {
 
   else if(position == 6){ // follow the path across the ramp
     expectedSectionDuration = 232/robotSpeed;
-    if (currentMillis - previousMillis >= rampUpDelay && currentMillis - previousMillis <= 7000) {
-      ramp_up();
-    } else if (currentMillis - previousMillis >= rampDownDelay && currentMillis - previousMillis <= 13000){
-      ramp_down();
-    } else {
-    follow_line();
-    }
     // Approaching next junction
     if(WideLeft.is_White() && currentMillis - previousMillis > 0.6 * expectedSectionDuration){
       if (Left.is_White() || Right.is_White()){
         position = 7; // move on to next position
         previousMillis = currentMillis;
       }
-    }  
+    } else{
+      follow_line();
+    }
   }
 
   else if (position == 7){ // cross the junction after the ramp
