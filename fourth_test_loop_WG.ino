@@ -37,7 +37,7 @@ const int grabber_open_position = 140;
 const long rampUpDelay = 7000;
 const long rampDownDelay = 9000;
 const int left_offset = 20; // Amount to increase left motor speed by over the right to go straight
-const int robotSpeed = 10; // centimetres per millisecond
+const double robotSpeed = 0.014; // centimetres per millisecond
 
 // Initiate variables
 long progStartTime = millis();
@@ -46,6 +46,11 @@ unsigned long previousMillis = 0;
 int orangeLedState;
 long lastFlashTime = progStartTime;
 long expectedSectionDuration;
+
+void motor_forward(){
+  motorLeft->run(FORWARD);
+  motorRight->run(FORWARD);
+}
 
 class LineSensor{
   private:
@@ -81,24 +86,30 @@ void follow_line(){
   if (Left.is_White() && Right.is_White()) { // On track: go straight
     motorLeft->setSpeed(255);
     motorRight->setSpeed(255 - left_offset);
+    motor_forward();
   } else if (Left.is_White() && Right.is_Black()){ // Too right, go left
     motorLeft->setSpeed(20);
     motorRight->setSpeed(220);
+    motor_forward();
   } else if (Left.is_Black() && Right.is_White()){ // Too left, go right
     motorLeft->setSpeed(220);
     motorRight->setSpeed(20);
+    motor_forward();
  } else if (Left.is_Black() && Right.is_Black() && WideLeft.is_White()) { // Much too right, go left
     motorLeft->setSpeed(20);
     motorRight->setSpeed(230);
+    motor_forward();
+    delay(200);
   } else if (Left.is_Black() && Right.is_Black() && WideRight.is_White()) { // Much too left, go right
     motorLeft->setSpeed(230);
     motorRight->setSpeed(20);
+    motor_forward();
+    delay(200);
   } else if (Left.is_Black() && Right.is_Black() && WideLeft.is_Black() && WideRight.is_Black()) { // All black, go forwards blindly
     motorLeft->setSpeed(255);
     motorRight->setSpeed(255 - left_offset);
+    motor_forward();
   }
-  motorLeft->run(FORWARD);
-  motorRight->run(FORWARD);
 }
 
 void turn_right_90(){
@@ -155,7 +166,21 @@ void tunnel_drive(){
 
 
 
+void ramp_up(){
+    motorLeft->setSpeed(255);
+    motorRight->setSpeed(255 - left_offset);
+    motorLeft->run(FORWARD);
+    motorRight->run(FORWARD);
+    delay(2000); 
+}
 
+void ramp_down(){
+    motorLeft->setSpeed(150);
+    motorRight->setSpeed(150);
+    motorLeft->run(FORWARD);
+    motorRight->run(FORWARD);
+    delay(2000); 
+} 
 
 
 
@@ -284,15 +309,21 @@ void loop() {
 
   else if(position == 6){ // follow the path across the ramp
     expectedSectionDuration = 232/robotSpeed;
+    if (currentMillis - previousMillis >= rampUpDelay && currentMillis - previousMillis <= 7000) {
+      // go up the ramp
+      ramp_up();
+    } else if (currentMillis - previousMillis >= rampDownDelay && currentMillis - previousMillis <= 13000){
+    // go down the ramp
+    ramp_down();
+    } else {
+    follow_line();
+    }
+    // Insert ramp function
     // Approaching next junction
-    if(WideLeft.is_White() && currentMillis - previousMillis > 0.6 * expectedSectionDuration){
-      if (Left.is_White() || Right.is_White()){
+    if(WideLeft.is_White() && (currentMillis - previousMillis > 0.6 * expectedSectionDuration)){
         position = 7; // move on to next position
         previousMillis = currentMillis;
-      }
-    } else{
-      follow_line();
-    }
+    }  
   }
 
   else if (position == 7){ // cross the junction after the ramp
