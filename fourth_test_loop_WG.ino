@@ -34,8 +34,8 @@ const int med_speed = 160;
 // Define constants
 const int grabber_closed_position = 80;
 const int grabber_open_position = 140;
-const long rampUpDelay = 7000;
-const long rampDownDelay = 9000;
+const long rampUpDelay = 6500;
+const long rampDownDelay = 13000;
 const int left_offset = 20; // Amount to increase left motor speed by over the right to go straight
 const double robotSpeed = 0.014; // centimetres per millisecond
 
@@ -171,12 +171,12 @@ void ramp_up(){
     motorRight->setSpeed(255 - left_offset);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
-    delay(2000); 
+    delay(4000); 
 }
 
 void ramp_down(){
-    motorLeft->setSpeed(150);
-    motorRight->setSpeed(150);
+    motorLeft->setSpeed(100);
+    motorRight->setSpeed(100);
     motorLeft->run(FORWARD);
     motorRight->run(FORWARD);
     delay(2000); 
