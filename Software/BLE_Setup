@@ -1,0 +1,140 @@
+#include <ArduinoBLE.h>
+#include <Adafruit_MotorShield.h>
+#include <Servo.h>
+
+// Create servo object for robot pincer arm
+Servo pincer;
+
+// Initiate motor shield object using default I2C address
+Adafruit_MotorShield AFMS = Adafruit_MotorShield();
+
+// Two motors for each of the front wheels, using ports M1 and M2
+Adafruit_DCMotor *left_motor = AFMS.getMotor(1);
+Adafruit_DCMotor *right_motor = AFMS.getMotor(2);
+// Motor speed can be set in range 0 (off) to 255 (max speed)
+
+const char* nameOfPeripheral = "M212_BLE_DEVICE"; 
+
+// Device name
+
+const char* uuidOfService = "0000ffe1-0000-1000-8000-00805f9b34fb";
+const char* uuidOfRxChar = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+const char* uuidOfTxChar = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+
+// BLE Service
+
+BLEService receiverService(uuidOfService); 
+
+// Setup the incoming data characteristic (RX)
+
+const int RX_BUFFER_SIZE = 256; 
+bool      RX_BUFFER_FIXED_LENGTH = false; 
+
+static bool      readNotWrite = true; 
+
+BLECharacteristic rxChar(uuidOfRxChar, BLEWriteWithoutResponse | BLEWrite, RX_BUFFER_SIZE, RX_BUFFER_FIXED_LENGTH); 
+BLEByteCharacteristic txChar(uuidOfTxChar, BLERead | BLENotify | BLEBroadcast);
+
+// LED pin numbers
+int redLED = 2;     // Red LED (dense)
+int greenLED = 4;   // Green LED (porous)
+int amberLED = 6;   // Amber LED (flashing)
+// max distance (in cm) for which a porous block is detected
+
+////////////////////////////////////////////////////////////////////////////////
+// Modes of operation for the robot, to be set by laptop via Bluetooth
+// All are set to false by default, until instructions are given by laptop
+char mode = "r";
+// scan: state for detecting type of block
+// move: state for when the robot is in motion, motors in use
+// grab: state for when servo is in use to grab block
+
+int instruction;
+
+void setup() {
+  // put your setup code here, to run once:
+
+  Serial.begin(9600); 
+  while(!Serial);
+
+  pinMode(LED_BUILTIN, OUTPUT); 
+
+  startBLE(); 
+
+  BLE.setLocalName(nameOfPeripheral); 
+  BLE.setAdvertisedService(receiverService); 
+  receiverService.addCharacteristic(rxChar);
+  receiverService.addCharacteristic(txChar);
+  BLE.addService(receiverService);
+
+  BLE.setEventHandler(BLEConnected, onBLEConnected);
+  BLE.setEventHandler(BLEDisconnected, onBLEDisconnected);
+  
+  rxChar.setEventHandler(BLEWritten, onRxCharValueUpdate);
+
+  BLE.advertise();
+
+  Serial.println(F("Bluetooth device active, waiting for connections..."));
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  byte data; 
+  char response[33];
+  byte charPos = 0; 
+
+  byte test_send = "12345"; 
+
+  BLEDevice central = BLE.central();
+  
+  if (central)
+  {
+
+    while(central.connected()) {
+      connectedLight(); 
+
+      }
+    
+    disconnectedLight(); 
+  }
+
+  else {
+    disconnectedLight(); 
+  }
+}
+
+void startBLE() {
+  if (!BLE.begin())
+  {
+    Serial.println(F("starting BLE failed!"));
+    while (1);
+  }
+}
+
+void onRxCharValueUpdate(BLEDevice central, BLECharacteristic characteristic) {
+  
+}
+
+void onBLEConnected(BLEDevice central) {
+  Serial.print("Connected event, central: ");
+  Serial.println(central.address());
+  connectedLight();
+}
+
+void onBLEDisconnected(BLEDevice central) {
+  Serial.print("Disconnected event, central: ");
+  Serial.println(central.address());
+  disconnectedLight();
+}
+
+/*
+ * LEDS
+ */
+void connectedLight() {
+  digitalWrite(amberLED, HIGH);
+
+}
+
+void disconnectedLight() {
+ digitalWrite(amberLED, LOW);
+}
