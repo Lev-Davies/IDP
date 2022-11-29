@@ -1,4 +1,4 @@
-// WG Created: 28/11/22 Modified: 28/11/22
+// WG Created: 28/11/22 Modified: 29/11/22
 // based on "fourth_test_loop_WG.ino"
 
 #include <Wire.h>
@@ -23,8 +23,8 @@ const int orangeLedPin = 13;
 
 // Define tunnel driving variables
 const int kp = 3;
-const int ki = 10;
-const int target = 55;
+const int ki = 3;
+const int target = 61;
 int I, P, prev_I, error;
 unsigned long current_time = 0;
 unsigned long prev_time = 0;
@@ -84,8 +84,8 @@ void turn_left_180(){
 class LineSensor{
   private:
    int pin;
-   int threshold;
   public:
+   int threshold;
   LineSensor(int p, int t){
     threshold = t;
     pin = p;
@@ -169,7 +169,7 @@ long get_tunnel_distance(){
 
 void tunnel_drive(){
     //Using a PI loop to follow the distance sensor in the tunnel
-    current_time = millis();
+    //current_time = millis();
     P = target - mm;
     I = prev_I + P*(current_time-prev_time);
     error = kp*P + ki*I;
@@ -187,14 +187,17 @@ void tunnel_drive(){
 
 void collect(){
   grabber.write(grabber_open_position);
-  delay(500); //delay for the grabber to be fully open so that it wont affect the detection
-  String density = "high";
-  for (int cycle = 0; cycle < 15; cycle += 1){
-    if (foamRecognition() == 0){
-      density = "low";
+  String density = "low";
+  motorLeft->setSpeed(150);
+  motorRight->setSpeed(150);
+  motorLeft->run(BACKWARD);
+  motorRight->run(BACKWARD);
+
+  for (int i = 0; i < 15; i++){
+    if (foamRecognition() == 1){ //a totay delay of 50 in each foamRocognition()
+      density = "high";
     }
-    motor_forward(150, 150);
-    delay(100);
+    Serial.println(density);
   }
   in_grabber = density;
   if (density == "low"){
@@ -204,7 +207,7 @@ void collect(){
     digitalWrite(greenLedPin, LOW);
     digitalWrite(redLedPin, HIGH);
   }
-  motor_forward(0, 0);
+  motor_forward(100, 100);
   delay(6000);
 
   grabber.write(grabber_closed_position);
@@ -226,7 +229,7 @@ void deposit(){
     turn_left_180();
     motorLeft->run(RELEASE);
     motorRight->run(RELEASE);
-    grabber.write(grabber_closed_position);
+    grabber.write(grabber_transport_position);
     motor_forward(150, 150);
     delay(1500);
     motorLeft->run(RELEASE);
@@ -279,7 +282,7 @@ void setup() {
 
 void loop() {
   unsigned long currentMillis = millis();
-  //Serial.println("Prev: " + String(prev_position) + " Position: " + String(position) + " Next: " + String(next_position));
+  Serial.println("Prev: " + String(prev_position) + " Position: " + String(position) + " Next: " + String(next_position));
 
   // Check for button to be pressed
   if (digitalRead(buttonPin) == HIGH && (currentMillis - progStartTime) > 1000){
@@ -299,6 +302,8 @@ void loop() {
     motorRight->run(RELEASE);
     grabber.write(grabber_transport_position);
     digitalWrite(orangeLedPin, LOW);
+    digitalWrite(redLedPin, LOW);
+    digitalWrite(greenLedPin, LOW);
     delay(1000);
     while (digitalRead(buttonPin) == LOW){
       Serial.println("Wide Left: " + String(WideLeft.read()) + " Left: " + String(Left.read()) + " Right: " + String(Right.read()) + " Wide Right: " + String(WideRight.read()));
@@ -427,19 +432,21 @@ void loop() {
     expectedSectionDuration = 232/robotSpeed;
     if (currentMillis - previousMillis >= 6500 && currentMillis - previousMillis <= 10500) {
       motor_forward(255, 255 - left_offset);
-    } else if (currentMillis - previousMillis >= 13000 && currentMillis - previousMillis <= 15000){
+    } else if (currentMillis - previousMillis >= 14000 && currentMillis - previousMillis <= 16000){
       motor_forward(100, 100);
     } else {
       follow_line();
     }
     if(WideLeft.is_White() && (currentMillis - previousMillis > 0.9 * expectedSectionDuration)){
-      prev_position = position; position = next_position;
-      if (block_location == 2){
-        next_position = 19;
-      } else{
-        next_position = 8;
+      if (Left.is_White() || Right.is_White()){
+        prev_position = position; position = next_position;
+        if (block_location == 2){
+          next_position = 19;
+        } else{
+          next_position = 8;
+        }
+        previousMillis = currentMillis;
       }
-      previousMillis = currentMillis;
     }  
   }
 
@@ -530,21 +537,22 @@ void loop() {
 
   else if(position == 12){ // Follow the path under the tunnel
     long tunnelDistance = get_tunnel_distance();
+    WideLeft.threshold = 400;
+    WideRight.threshold = 400;
     if (Left.is_Black() && Right.is_Black() && tunnelDistance > 100){
-      motorLeft->setSpeed(255);
-      motorRight->setSpeed(255-left_offset);
-      motorLeft->run(FORWARD);
-      motorRight->run(FORWARD);
+      motor_forward(255, 255 - left_offset);
     } else if(Left.is_Black() && Right.is_Black() && tunnelDistance < 100){
       tunnel_drive();
     } else if(WideRight.is_White()){
-        prev_position = position; position = next_position;
-        if (in_grabber == "low"){
-          next_position = 21;
-        } else{
-          next_position = 16;
-        }
-        previousMillis = currentMillis;
+      prev_position = position; position = next_position;
+      if (in_grabber == "low"){
+        next_position = 21;
+      } else{
+        next_position = 16;
+      }
+      previousMillis = currentMillis;
+      WideLeft.threshold = 600;
+      WideRight.threshold = 600;
     } else {
         follow_line();
     }
@@ -660,13 +668,24 @@ void loop() {
 
   else if (position == 21){ // Moving along the short white line
     expectedSectionDuration = 16/robotSpeed;
-    if(WideRight.is_White() || WideLeft.is_White()){
-      if (currentMillis - previousMillis > 9 * expectedSectionDuration){
-        prev_position = position; position = next_position; next_position = 22;
-        previousMillis = currentMillis;
+    if (prev_position == 15 && next_position == 22){
+      if(WideRight.is_White() || WideLeft.is_White()){
+        if (currentMillis - previousMillis > 9 * expectedSectionDuration){
+          prev_position = position; position = next_position; next_position = 22;
+          previousMillis = currentMillis;
+        }
+      } else {
+        follow_line();
       }
-    } else {
-      follow_line();
+    } else if (prev_position == 22 && next_position == 15){
+      if(WideRight.is_White() || WideLeft.is_White()){
+        if (currentMillis - previousMillis > 9 * expectedSectionDuration){
+          prev_position = position; position = next_position; next_position = 16;
+          previousMillis = currentMillis;
+        }
+      } else {
+        follow_line();
+      }
     }
   }
 
