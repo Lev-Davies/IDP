@@ -23,7 +23,7 @@ const int orangeLedPin = 13;
 
 // Define tunnel driving variables
 const int kp = 3;
-const int ki = 3;
+const int ki = 10;
 const int target = 55;
 int I, P, prev_I, error;
 unsigned long current_time = 0;
@@ -32,8 +32,9 @@ long pingTime, mm;
 const int med_speed = 160;
 
 // Define constants
-const int grabber_closed_position = 80;
-const int grabber_open_position = 140;
+const int grabber_closed_position = 50;
+const int grabber_open_position = 110;
+const int grabber_transport_position = 70;
 const int left_offset = 20; // Amount to increase left motor speed by over the right to go straight
 const double robotSpeed = 0.014; // centimetres per millisecond
 
@@ -61,7 +62,7 @@ void turn_right_90(){
   motorRight->setSpeed(255 - left_offset);
   motorLeft->run(FORWARD);
   motorRight->run(BACKWARD);
-  delay(1000); 
+  delay(1050); 
 }
 
 void turn_left_90(){
@@ -69,7 +70,7 @@ void turn_left_90(){
     motorRight->setSpeed(255 - left_offset);
     motorLeft->run(BACKWARD);
     motorRight->run(FORWARD);
-    delay(1000);
+    delay(1050);
 }
 
 void turn_left_180(){
@@ -77,7 +78,7 @@ void turn_left_180(){
     motorRight->setSpeed(255 - left_offset);
     motorLeft->run(BACKWARD);
     motorRight->run(FORWARD);
-    delay(2000);
+    delay(2100);
 }
 
 class LineSensor{
@@ -144,7 +145,7 @@ int foamRecognition() { //return the type of the foam
     pingTime = pulseIn(blockReceivePin, HIGH);
     mm = pingTime / 2.9 / 2;
     ave_mm = ave_mm + mm;
-    delay(10);     
+    delay(10);
   }
 }
 
@@ -186,17 +187,14 @@ void tunnel_drive(){
 
 void collect(){
   grabber.write(grabber_open_position);
-    String density = "high";
-    for (int cycle = 0; cycle < 15; cycle += 1){
-      if (foamRecognition() == 0){
-        density = "low";
-      }
-      motor_forward(150, 150);
-      delay(100);
+  delay(500); //delay for the grabber to be fully open so that it wont affect the detection
+  String density = "high";
+  for (int cycle = 0; cycle < 15; cycle += 1){
+    if (foamRecognition() == 0){
+      density = "low";
     }
-    grabber.write(grabber_closed_position);
-  if (block_location == 2 || block_location == 3){
-    turn_left_180();
+    motor_forward(150, 150);
+    delay(100);
   }
   in_grabber = density;
   if (density == "low"){
@@ -205,6 +203,14 @@ void collect(){
   } else if (density == "high"){
     digitalWrite(greenLedPin, LOW);
     digitalWrite(redLedPin, HIGH);
+  }
+  motor_forward(0, 0);
+  delay(6000);
+
+  grabber.write(grabber_closed_position);
+
+  if (block_location == 2 || block_location == 3){
+    turn_left_180();
   }
 }
 
@@ -273,11 +279,12 @@ void setup() {
 
 void loop() {
   unsigned long currentMillis = millis();
-  Serial.println("Prev: " + String(prev_position) + " Position: " + String(position) + " Next: " + String(next_position));
+  //Serial.println("Prev: " + String(prev_position) + " Position: " + String(position) + " Next: " + String(next_position));
 
   // Check for button to be pressed
   if (digitalRead(buttonPin) == HIGH && (currentMillis - progStartTime) > 1000){
     position = 999;
+    next_position = 0;
   }
 
   // Flash the orange beacon while running
@@ -290,6 +297,7 @@ void loop() {
   if(position == 999){ // Wait for button press before starting
     motorLeft->run(RELEASE);
     motorRight->run(RELEASE);
+    grabber.write(grabber_transport_position);
     digitalWrite(orangeLedPin, LOW);
     delay(1000);
     while (digitalRead(buttonPin) == LOW){
@@ -297,7 +305,7 @@ void loop() {
       delay(10);
     }
     progStartTime = millis();
-    prev_position = position; position = next_position; next_position == 1;
+    prev_position = position; position = next_position; next_position = 1;
     previousMillis = currentMillis;
   }
 
@@ -333,7 +341,7 @@ void loop() {
     expectedSectionDuration = 16/robotSpeed;
     if (prev_position == 1 && next_position == 3){
       if(WideRight.is_White() || WideLeft.is_White()){
-        if (currentMillis - previousMillis > 0.8 * expectedSectionDuration) {
+        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration) {
           prev_position = position; position = next_position; next_position = 4;
           previousMillis = currentMillis;
         }
@@ -342,7 +350,7 @@ void loop() {
       }
     } else if (prev_position == 3 && next_position == 1){
       if(WideRight.is_White() || WideLeft.is_White()){
-        if (currentMillis - previousMillis > 0.8 * expectedSectionDuration) {
+        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration) {
           prev_position = position; position = next_position; next_position = 999;
           previousMillis = currentMillis;
         }
@@ -378,7 +386,7 @@ void loop() {
   else if(position == 4){ // Following straight white line
     expectedSectionDuration = 68/robotSpeed;
     if(WideRight.is_White()){
-      if (currentMillis - previousMillis > 0.8 * expectedSectionDuration) {
+      if (currentMillis - previousMillis > 0.9 * expectedSectionDuration) {
         prev_position = position; position = next_position; // move on to next position
         if (in_grabber == "high"){
           next_position = 17;
@@ -424,7 +432,7 @@ void loop() {
     } else {
       follow_line();
     }
-    if(WideLeft.is_White() && (currentMillis - previousMillis > 0.6 * expectedSectionDuration)){
+    if(WideLeft.is_White() && (currentMillis - previousMillis > 0.9 * expectedSectionDuration)){
       prev_position = position; position = next_position;
       if (block_location == 2){
         next_position = 19;
@@ -461,7 +469,7 @@ void loop() {
   else if (position == 8){ // Driving from junction 7 to the cross
     expectedSectionDuration = 38/robotSpeed;
     if (WideRight.is_White() || WideLeft.is_White()){
-      if (currentMillis - previousMillis > 0.6 * expectedSectionDuration){
+      if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
         if (block_location == 1){
           collect();
         }
@@ -484,7 +492,7 @@ void loop() {
   
   else if (position == 10){ // Follow the straight line after the cross
     expectedSectionDuration = 38/robotSpeed;
-    if (WideLeft.is_White() && currentMillis - previousMillis > 0.6 * expectedSectionDuration){ 
+    if (WideLeft.is_White() && currentMillis - previousMillis > 0.9 * expectedSectionDuration){ 
       prev_position = position; position = next_position;
       if (block_location == 3){
         next_position = 20;
@@ -497,7 +505,7 @@ void loop() {
     }
   }
 
-  else if (position == 7){ // cross the junction after the ramp
+  else if (position == 11){ // cross the junction after the ramp
     if (prev_position == 10 && next_position == 12){
       if (WideLeft.is_Black()) {
         prev_position = position; position = next_position; next_position = 15;
@@ -567,7 +575,7 @@ void loop() {
   
   else if (position == 16) {
     expectedSectionDuration = 68/robotSpeed;
-    if (WideRight.is_White() && currentMillis - previousMillis > 0.6 * expectedSectionDuration) {
+    if (WideRight.is_White() && currentMillis - previousMillis > 0.9 * expectedSectionDuration) {
       prev_position = position; position = next_position; next_position = 4;
       previousMillis = currentMillis;
     } else {
@@ -578,7 +586,7 @@ void loop() {
   else if (position == 17){ // Moving along the short white line
     expectedSectionDuration = 16/robotSpeed;
     if(WideRight.is_White() || WideLeft.is_White()){
-      if (currentMillis - previousMillis > 0.8 * expectedSectionDuration) {
+      if (currentMillis - previousMillis > 0.9 * expectedSectionDuration) {
         prev_position = position; position = next_position; next_position = 18;
         previousMillis = currentMillis;
       }
@@ -606,7 +614,7 @@ void loop() {
     expectedSectionDuration = 18/robotSpeed;
     if (prev_position == 7 && next_position == 19){
       if (Left.is_Black() && Right.is_Black()){
-        if (currentMillis - previousMillis > 0.8 * expectedSectionDuration){
+        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
           collect();
           prev_position = position; position = next_position; next_position = 7;
           previousMillis = currentMillis;
@@ -616,7 +624,7 @@ void loop() {
       }
     } else if (prev_position == 19 && next_position == 7){
       if (WideLeft.is_White() || WideRight.is_White()){
-        if (currentMillis - previousMillis > 0.8 * expectedSectionDuration){
+        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
           prev_position = position; position = next_position; next_position = 8;
           previousMillis = currentMillis;
         }
@@ -630,7 +638,7 @@ void loop() {
     expectedSectionDuration = 18/robotSpeed;
     if (prev_position == 11 && next_position == 20){
       if (Left.is_Black() && Right.is_Black()){
-        if (currentMillis - previousMillis > 0.8 * expectedSectionDuration){
+        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
           collect();
           prev_position = position; position = next_position; next_position = 11;
           previousMillis = currentMillis;
@@ -640,7 +648,7 @@ void loop() {
       }
     } else if (prev_position == 20 && next_position == 11){
       if (WideLeft.is_White() || WideRight.is_White()){
-        if (currentMillis - previousMillis > 0.8 * expectedSectionDuration){
+        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
           prev_position = position; position = next_position; next_position = 12;
           previousMillis = currentMillis;
         }
@@ -653,7 +661,7 @@ void loop() {
   else if (position == 21){ // Moving along the short white line
     expectedSectionDuration = 16/robotSpeed;
     if(WideRight.is_White() || WideLeft.is_White()){
-      if (currentMillis - previousMillis > 0.8 * expectedSectionDuration){
+      if (currentMillis - previousMillis > 9 * expectedSectionDuration){
         prev_position = position; position = next_position; next_position = 22;
         previousMillis = currentMillis;
       }
