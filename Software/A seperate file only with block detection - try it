@@ -1,0 +1,191 @@
+#include <Wire.h>
+#include <Adafruit_MotorShield.h>
+#include "utility/Adafruit_MS_PWMServoDriver.h"
+#include <Servo.h>
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+Adafruit_DCMotor *motorLeft = AFMS.getMotor(1);
+Adafruit_DCMotor *motorRight = AFMS.getMotor(2);
+Servo grabber;  // create servo object to control a servo
+
+// Define pin numbers
+const int buttonPin = 2;
+const int blockReceivePin = 6;
+const int blockPingPin = 7;
+const int grabberServoPin = 8;
+const int tunnelReceivePin = 9;
+const int tunnelPingPin = 10;
+const int redLedPin = 11;
+const int greenLedPin = 12;
+const int orangeLedPin = 13;
+
+// Define tunnel driving variables
+const int kp = 3;
+const int ki = 3;
+const int target = 55;
+int I, P, prev_I, error;
+unsigned long current_time = 0;
+unsigned long prev_time = 0;
+long pingTime, mm;
+const int med_speed = 160;
+
+// Define constants
+const int grabber_closed_position = 80;
+const int grabber_open_position = 140;
+const long rampUpDelay = 5000;
+const long rampDownDelay = 9000;
+const int left_offset = 20; // Amount to increase left motor speed by over the right to go straight
+const int robotSpeed = 0.01; // centimetres per millisecond
+
+int density = 1; // the density is initialised as 1 (high). Once there is a low reading, it will become 0 and will not be back to 1 unless a reset function to be called.
+int detectionState = 1; // 1: detection is not done 0: detection is done
+
+// Initiate variables
+long progStartTime = millis();
+int position = 999;
+unsigned long previousMillis = 0;
+int orangeLedState;
+long lastFlashTime = progStartTime;
+long expectedSectionDuration;
+
+class LineSensor{
+  private:
+   int pin;
+   int threshold;
+  public:
+  LineSensor(int p, int t){
+    threshold = t;
+    pin = p;
+    pinMode(pin, INPUT);
+  }
+
+  double read(){
+    return analogRead(pin);
+  }
+
+  bool is_White(){
+    return analogRead(pin) <= threshold;
+  }
+  bool is_Black(){
+    return analogRead(pin) >= threshold;
+  }
+};
+
+// Define all Line Sensors
+LineSensor Left(A3, 600);
+LineSensor Right(A2, 600);
+LineSensor WideLeft(A1, 600);
+LineSensor WideRight(A0, 600);
+
+long distance_in_millimeters(long microseconds){
+   // The speed of sound is 340 m/s or 29 microseconds per centimeter.
+   // The ping travels out and back, so to find the distance of the object we
+   // take half of the distance travelled.
+   return microseconds / 2.9 / 2;
+}
+
+int foamRecognition() { //return the type of the foam
+  long pingTime, mm;
+  double ave_mm = 0; //average distance
+  int numberOfCylesForAverage = 5;
+  int foamType; // 1 or 0 - high or low
+  int DistanceThreshold = 200; // if the distance from sensor is below this value, it will be recognised as low density - if IR is used simultanously, this can be modified and compared with the result from IR sensor
+
+  for (int cycle = 0; cycle < numberOfCylesForAverage; cycle += 1){
+    digitalWrite(blockPingPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(blockPingPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(blockPingPin, LOW);
+
+    pingTime = pulseIn(blockReceivePin, HIGH);
+
+    mm = distance_in_millimeters(pingTime);
+    ave_mm = ave_mm + mm;
+    //Serial.print(mm);
+    //Serial.print("mm");
+    //Serial.println();
+    delay(10);     
+  }
+  
+  ave_mm = ave_mm / numberOfCylesForAverage;
+
+  if (ave_mm <= DistanceThreshold){
+    foamType = 0; //low density
+    Serial.println("low");
+    Serial.println(ave_mm);
+  } else {
+    foamType = 1; //high density
+    Serial.println("high");
+    Serial.println(ave_mm);
+  }
+  return foamType;
+}
+
+void grab(){ // to be completed
+    resetDensity();
+}
+
+void resetDensity(){ //reset when the robot is on the stright line and ready to detect the block
+    density = 1;
+}
+
+void moveBackAndForthAndDetect() { //move back and forth to detect the type of the foam and also shine the correct LED light
+    motorLeft->setSpeed(150);
+    motorRight->setSpeed(150);
+    motorLeft->run(BACKWARD);
+    motorRight->run(BACKWARD);
+    for (int i = 0; i < 40; i++){
+      if (foamRecognition() == 0){ //a totay delay of 50 in each foamRocognition()
+        density = 0;
+      }
+    }
+    motorLeft->setSpeed(150);
+    motorRight->setSpeed(150);
+    motorLeft->run(FORWARD);
+    motorRight->run(FORWARD);
+    delay(2100); //slightly greater than 2000 to ensure the foam is in front of the robot
+    motorLeft->setSpeed(0);
+    motorRight->setSpeed(0);
+    LEDforFoamType();
+    delay(6000); //The LED should clearly illuminate for >5 seconds while the robot is stationary
+  }
+
+void LEDforFoamType() {
+  if (density == 1){ // high density - red led on
+    digitalWrite(redLedPin, HIGH);
+    digitalWrite(greenLedPin, LOW);
+  }
+  else {
+    digitalWrite(redLedPin, LOW);
+    digitalWrite(greenLedPin, HIGH);
+  }
+}
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600); //initiates serial moniter
+  pinMode(blockPingPin, OUTPUT);
+  pinMode(blockReceivePin, INPUT);
+  pinMode(tunnelPingPin, OUTPUT);
+  pinMode(tunnelReceivePin, INPUT);
+  pinMode(orangeLedPin, OUTPUT);
+  digitalWrite(orangeLedPin, LOW);
+  pinMode(greenLedPin, OUTPUT);
+  digitalWrite(greenLedPin, LOW);
+  pinMode(redLedPin, OUTPUT);
+  digitalWrite(redLedPin, LOW);
+  AFMS.begin();
+  motorLeft->setSpeed(200);
+  motorRight->setSpeed(200 - left_offset);
+  grabber.attach(grabberServoPin);
+}
+
+void loop() {
+  // add inside the section when the middle junction is reached  
+  if (detectionState == 1) {
+    moveBackAndForthAndDetect();
+    detectionState = 0;
+  }
+  Serial.println(density);
+  delay(5);  
+}
