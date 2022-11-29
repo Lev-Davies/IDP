@@ -36,8 +36,6 @@ const int grabber_closed_position = 80;
 const int grabber_open_position = 140;
 const int left_offset = 20; // Amount to increase left motor speed by over the right to go straight
 const double robotSpeed = 0.014; // centimetres per millisecond
-String in_grabber = "empty";
-int block_location = 1; // Starting position for the block
 
 // Initiate variables
 long progStartTime = millis();
@@ -48,12 +46,38 @@ unsigned long previousMillis = 0;
 int orangeLedState;
 long lastFlashTime = progStartTime;
 long expectedSectionDuration;
+String in_grabber = "empty";
+int block_location = 1; // Starting position for the block
 
 void motor_forward(int leftSpeed, int rightSpeed){
   motorLeft->setSpeed(leftSpeed);
   motorRight->setSpeed(rightSpeed);
   motorLeft->run(FORWARD);
   motorRight->run(FORWARD);
+}
+
+void turn_right_90(){
+  motorLeft->setSpeed(255);
+  motorRight->setSpeed(255 - left_offset);
+  motorLeft->run(FORWARD);
+  motorRight->run(BACKWARD);
+  delay(1000); 
+}
+
+void turn_left_90(){
+    motorLeft->setSpeed(255);
+    motorRight->setSpeed(255 - left_offset);
+    motorLeft->run(BACKWARD);
+    motorRight->run(FORWARD);
+    delay(1000);
+}
+
+void turn_left_180(){
+    motorLeft->setSpeed(255);
+    motorRight->setSpeed(255 - left_offset);
+    motorLeft->run(BACKWARD);
+    motorRight->run(FORWARD);
+    delay(2000);
 }
 
 class LineSensor{
@@ -124,30 +148,6 @@ int foamRecognition() { //return the type of the foam
   }
 }
 
-void turn_right_90(){
-  motorLeft->setSpeed(255);
-  motorRight->setSpeed(255 - left_offset);
-  motorLeft->run(FORWARD);
-  motorRight->run(BACKWARD);
-  delay(1000); 
-}
-
-void turn_left_90(){
-    motorLeft->setSpeed(255);
-    motorRight->setSpeed(255 - left_offset);
-    motorLeft->run(BACKWARD);
-    motorRight->run(FORWARD);
-    delay(1000);
-}
-
-void turn_left_180(){
-    motorLeft->setSpeed(255);
-    motorRight->setSpeed(255 - left_offset);
-    motorLeft->run(BACKWARD);
-    motorRight->run(FORWARD);
-    delay(2000);
-}
-
 long get_tunnel_distance(){
     // establish variables for duration of the ping, and the distance
     // The PING is triggered by a HIGH pulse of 2 or more microseconds.
@@ -168,6 +168,7 @@ long get_tunnel_distance(){
 
 void tunnel_drive(){
     //Using a PI loop to follow the distance sensor in the tunnel
+    current_time = millis();
     P = target - mm;
     I = prev_I + P*(current_time-prev_time);
     error = kp*P + ki*I;
@@ -183,7 +184,7 @@ void tunnel_drive(){
     motorRight->setSpeed(speedRight);
 }
 
-String collect(int block_location, String in_grabber){
+void collect(){
   grabber.write(grabber_open_position);
     String density = "high";
     for (int cycle = 0; cycle < 15; cycle += 1){
@@ -205,10 +206,9 @@ String collect(int block_location, String in_grabber){
     digitalWrite(greenLedPin, LOW);
     digitalWrite(redLedPin, HIGH);
   }
-  return in_grabber;
 }
 
-String deposit(String in_grabber){
+void deposit(){
     motor_forward(150, 150);
     delay(2500);
     motorLeft->run(RELEASE);
@@ -228,7 +228,13 @@ String deposit(String in_grabber){
     in_grabber = "empty";
     digitalWrite(greenLedPin, LOW);
     digitalWrite(redLedPin, LOW);
-    return in_grabber;
+    if (block_location == 1){
+      block_location = 2;
+    } else if (block_location == 2){
+      block_location = 3;
+    } else if (block_location == 3){
+      block_location = 1;
+    }
 }
 
 void setup() {
@@ -457,7 +463,7 @@ void loop() {
     if (WideRight.is_White() || WideLeft.is_White()){
       if (currentMillis - previousMillis > 0.6 * expectedSectionDuration){
         if (block_location == 1){
-          in_grabber = collect(block_location, in_grabber);
+          collect();
         }
         prev_position = position; position = next_position; next_position = 10;
         previousMillis = currentMillis;
@@ -584,7 +590,7 @@ void loop() {
   else if (position == 18){ // crossing perpendicular line to deposit high density block
     if (prev_position == 17 && next_position == 18){
       if(WideRight.is_Black() || WideLeft.is_Black()){
-        in_grabber = deposit(in_grabber);
+        deposit();
         prev_position = position; position = next_position; next_position = 17;
         previousMillis = currentMillis;
       }
@@ -601,7 +607,7 @@ void loop() {
     if (prev_position == 7 && next_position == 19){
       if (Left.is_Black() && Right.is_Black()){
         if (currentMillis - previousMillis > 0.8 * expectedSectionDuration){
-          in_grabber = collect(block_location, in_grabber);
+          collect();
           prev_position = position; position = next_position; next_position = 7;
           previousMillis = currentMillis;
         }
@@ -625,7 +631,7 @@ void loop() {
     if (prev_position == 11 && next_position == 20){
       if (Left.is_Black() && Right.is_Black()){
         if (currentMillis - previousMillis > 0.8 * expectedSectionDuration){
-          in_grabber = collect(block_location, in_grabber);
+          collect();
           prev_position = position; position = next_position; next_position = 11;
           previousMillis = currentMillis;
         }
@@ -659,7 +665,7 @@ void loop() {
   else if (position == 22){ // crossing perpendicular line to deposit high density block
     if (prev_position == 21 && next_position == 22){
       if(WideRight.is_Black() || WideLeft.is_Black()){
-        in_grabber = deposit(in_grabber);
+        deposit();
         prev_position = position; position = next_position; next_position = 21;
         previousMillis = currentMillis;
       }
