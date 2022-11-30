@@ -551,8 +551,9 @@ void loop() {
 
   else if(position == 12){ // Follow the path under the tunnel
     long tunnelDistance = get_tunnel_distance();
-    WideLeft.threshold = 400;
-    WideRight.threshold = 400;
+    //WideLeft.threshold = 400;
+    //WideRight.threshold = 400;
+    Left.threshold = 760;
     if (Left.is_Black() && Right.is_Black() && tunnelDistance > 100){
       motor_forward(255, 255 - left_offset);
     } else if(Left.is_Black() && Right.is_Black() && tunnelDistance < 100){
