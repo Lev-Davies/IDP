@@ -607,13 +607,28 @@ void loop() {
 
   else if (position == 17){ // Moving along the short white line
     expectedSectionDuration = 16/robotSpeed;
-    if(WideRight.is_White() || WideLeft.is_White()){
-      if (currentMillis - previousMillis > 0.9 * expectedSectionDuration) {
-        prev_position = position; position = next_position; next_position = 18;
-        previousMillis = currentMillis;
+    Left.threshold = 800;
+    WideLeft.threshold = 800;
+    if (prev_position == 5 && next_position == 18){
+      if(WideRight.is_White() || WideLeft.is_White()){
+        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
+          prev_position = position; position = next_position; next_position = 18;
+          previousMillis = currentMillis;
+        }
+      } else {
+        follow_line();
       }
-    } else {
-      follow_line();
+    } else if (prev_position == 18 && next_position == 5){
+      Left.threshold = 600;
+      WideLeft.threshold = 600;
+      if(WideRight.is_White() || WideLeft.is_White()){
+        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
+          prev_position = position; position = next_position; next_position = 6;
+          previousMillis = currentMillis;
+        }
+      } else {
+        follow_line();
+      }
     }
   }
 
@@ -682,9 +697,11 @@ void loop() {
 
   else if (position == 21){ // Moving along the short white line
     expectedSectionDuration = 16/robotSpeed;
+    Left.threshold = 800;
+    WideLeft.threshold = 800;
     if (prev_position == 15 && next_position == 22){
       if(WideRight.is_White() || WideLeft.is_White()){
-        if (currentMillis - previousMillis > 9 * expectedSectionDuration){
+        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
           prev_position = position; position = next_position; next_position = 22;
           previousMillis = currentMillis;
         }
@@ -692,8 +709,10 @@ void loop() {
         follow_line();
       }
     } else if (prev_position == 22 && next_position == 15){
+      Left.threshold = 600;
+      WideLeft.threshold = 600;
       if(WideRight.is_White() || WideLeft.is_White()){
-        if (currentMillis - previousMillis > 9 * expectedSectionDuration){
+        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
           prev_position = position; position = next_position; next_position = 16;
           previousMillis = currentMillis;
         }
