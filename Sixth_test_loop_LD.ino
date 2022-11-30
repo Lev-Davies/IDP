@@ -221,7 +221,9 @@ void collect(){
   }
   motor_forward(100, 100);
   delay(6000);
-
+  motorLeft->run(RELEASE);
+  motorRight->run(RELEASE);
+  delay(5000);
   grabber.write(grabber_closed_position);
 
   if (block_location == 2 || block_location == 3){
