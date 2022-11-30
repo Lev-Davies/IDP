@@ -199,7 +199,7 @@ void tunnel_drive(){
 
 void collect(){
   grabber.write(grabber_open_position);
-  int density = 0;
+  String density = "low";
   motorLeft->setSpeed(150);
   motorRight->setSpeed(150);
   motorLeft->run(BACKWARD);
@@ -207,15 +207,15 @@ void collect(){
 
   for (int i = 0; i < 15; i++){
     if (foamRecognition() == 1){ //a totay delay of 50 in each foamRocognition()
-      density = 1;
+      density = "high";
     }
     Serial.println(density);
   }
   in_grabber = density;
-  if (density == 0){
+  if (density == "low"){
     digitalWrite(greenLedPin, HIGH);
     digitalWrite(redLedPin, LOW);
-  } else if (density == 1){
+  } else if (density == "high"){
     digitalWrite(greenLedPin, LOW);
     digitalWrite(redLedPin, HIGH);
   }
