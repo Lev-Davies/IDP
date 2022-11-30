@@ -34,7 +34,7 @@ const int med_speed = 160;
 // Define constants
 const int grabber_closed_position = 50;
 const int grabber_open_position = 110;
-const int grabber_transport_position = 70;
+const int grabber_transport_position = 90;
 const int left_offset = 20; // Amount to increase left motor speed by over the right to go straight
 const double robotSpeed = 0.014; // centimetres per millisecond
 
@@ -62,7 +62,7 @@ void turn_right_90(){
   motorRight->setSpeed(255 - left_offset);
   motorLeft->run(FORWARD);
   motorRight->run(BACKWARD);
-  delay(1050); 
+  delay(1075); // this has now been calibrated
 }
 
 void turn_left_90(){
@@ -70,7 +70,7 @@ void turn_left_90(){
     motorRight->setSpeed(255 - left_offset);
     motorLeft->run(BACKWARD);
     motorRight->run(FORWARD);
-    delay(800);
+    delay(1220); // this has now been calibrated
 }
 
 void turn_left_180(){
@@ -78,7 +78,20 @@ void turn_left_180(){
     motorRight->setSpeed(255 - left_offset);
     motorLeft->run(BACKWARD);
     motorRight->run(FORWARD);
-    delay(2100);
+    delay(2300); // this has now been calibrated
+}
+
+void celebration(){
+  for (int i = 0; i < 2; i++){
+    grabber.write(grabber_open_position);
+    delay(1000);
+    grabber.write(grabber_closed_position);
+    delay(1000);
+    grabber.write(grabber_transport_position);
+    delay(1000);
+    grabber.write(grabber_closed_position);
+    delay(1000);
+  }
 }
 
 class LineSensor{
@@ -95,10 +108,21 @@ class LineSensor{
     return analogRead(pin);
   }
   bool is_White(){
-    return analogRead(pin) <= threshold;
+    int output = analogRead(pin);
+    delay(3);
+    output = output + analogRead(pin);
+    delay(3);
+    output = output + analogRead(pin);
+    return output/3 <= threshold;
+
   }
   bool is_Black(){
-    return analogRead(pin) >= threshold;
+    int output = analogRead(pin);
+    delay(3);
+    output = output + analogRead(pin);
+    delay(3);
+    output = output + analogRead(pin);
+    return output/3 >= threshold;
   }
 };
 
@@ -106,7 +130,7 @@ class LineSensor{
 LineSensor Left(A3, 600);
 LineSensor Right(A2, 600);
 LineSensor WideLeft(A1, 600);
-LineSensor WideRight(A0, 300);
+LineSensor WideRight(A0, 340);
 
 void follow_line(){
   if (Left.is_White() && Right.is_White()) { // On track: go straight
@@ -175,13 +199,14 @@ long get_tunnel_distance(){
     mm = pingTime / 2.9 / 2;
     // The speed of sound is 340 m/s or 2.9 microseconds per millimeter.
     // Divide by 2 to account for signal goin there and back
-    Serial.println(String(pingTime) + String(mm) + " mm");
+    //Serial.println(String(pingTime) + String(mm) + " mm");
     return mm;
 }
 
 void tunnel_drive(){
     //Using a PI loop to follow the distance sensor in the tunnel
     //current_time = millis();
+    //Serial.println("Tunnel mode");
     P = target - mm;
     I = prev_I + P*(current_time-prev_time);
     error = kp*P + ki*I;
@@ -221,7 +246,7 @@ void collect(){
     digitalWrite(redLedPin, HIGH);
   }
   motor_forward(100, 100);
-  delay(6000);
+  delay(3000);
   motorLeft->run(RELEASE);
   motorRight->run(RELEASE);
   delay(5000);
@@ -238,6 +263,7 @@ void deposit(){
     motorLeft->run(RELEASE);
     motorRight->run(RELEASE);
     grabber.write(grabber_open_position);
+    delay(500);
     motorLeft->run(BACKWARD);
     motorRight->run(BACKWARD);
     delay(1000);
@@ -245,10 +271,6 @@ void deposit(){
     motorLeft->run(RELEASE);
     motorRight->run(RELEASE);
     grabber.write(grabber_transport_position);
-    motor_forward(150, 150);
-    delay(1500);
-    motorLeft->run(RELEASE);
-    motorRight->run(RELEASE);
     in_grabber = "empty";
     digitalWrite(greenLedPin, LOW);
     digitalWrite(redLedPin, LOW);
@@ -297,7 +319,8 @@ void setup() {
 
 void loop() {
   unsigned long currentMillis = millis();
-  Serial.println("Prev: " + String(prev_position) + " Position: " + String(position) + " Next: " + String(next_position));
+  //Serial.println("Prev: " + String(prev_position) + " Position: " + String(position) + " Next: " + String(next_position));
+  //Serial.println(currentMillis - previousMillis);
 
   // Check for button to be pressed
   if (digitalRead(buttonPin) == HIGH && (currentMillis - progStartTime) > 1000){
@@ -353,6 +376,7 @@ void loop() {
         motor_forward(255, 255 - left_offset);
         delay(2500);
         turn_left_180();
+        celebration();
         prev_position = position; position = next_position; next_position = 0;
         previousMillis = currentMillis;
       }
@@ -472,6 +496,7 @@ void loop() {
       if (WideLeft.is_Black()) {
         prev_position = position; position = next_position; next_position = 9;
         previousMillis = currentMillis;
+        grabber.write(grabber_open_position);
       } else {
         follow_line();
       }
@@ -480,6 +505,7 @@ void loop() {
         turn_left_90();
         prev_position = position; position = next_position; next_position = 19;
         previousMillis = currentMillis;
+        grabber.write(grabber_open_position);
       }
     } else if (prev_position == 19 && next_position == 8){
       if((currentMillis - previousMillis) > 250){
@@ -553,21 +579,24 @@ void loop() {
   }
 
   else if(position == 12){ // Follow the path under the tunnel
-    long tunnelDistance = get_tunnel_distance();
-    Left.threshold = 800;
-    if (Left.is_Black() && Right.is_Black() && tunnelDistance > 100){
+    expectedSectionDuration = 236/robotSpeed;
+    //long tunnelDistance = get_tunnel_distance();
+    Left.threshold = 820;
+    /*if (Left.is_Black() && Right.is_Black() && tunnelDistance > 200){
       motor_forward(255, 255 - left_offset);
-    } else if(Left.is_Black() && Right.is_Black() && tunnelDistance < 100){
-      tunnel_drive();
-    } else if(WideRight.is_White()){
-      prev_position = position; position = next_position;
-      if (in_grabber == "low"){
-        next_position = 21;
-      } else{
-        next_position = 16;
-      }
-      previousMillis = currentMillis;
-      Left.threshold = 600;
+    } else if(Left.is_Black() && Right.is_Black() && tunnelDistance < 200){
+      tunnel_drive();*/
+    if(WideRight.is_White()){
+        if (currentMillis - previousMillis > 0.7 * expectedSectionDuration){
+          prev_position = position; position = next_position;
+          if (in_grabber == "low"){
+            next_position = 21;
+          } else{
+            next_position = 16;
+          }
+          previousMillis = currentMillis;
+          Left.threshold = 600;
+        }
     } else {
         follow_line();
     }
@@ -612,7 +641,7 @@ void loop() {
     WideLeft.threshold = 800;
     if (prev_position == 5 && next_position == 18){
       if(WideRight.is_White() || WideLeft.is_White()){
-        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
+        if (currentMillis - previousMillis > 0.7 * expectedSectionDuration){
           prev_position = position; position = next_position; next_position = 18;
           previousMillis = currentMillis;
         }
@@ -623,7 +652,7 @@ void loop() {
       Left.threshold = 600;
       WideLeft.threshold = 600;
       if(WideRight.is_White() || WideLeft.is_White()){
-        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
+        if (currentMillis - previousMillis > 0.7 * expectedSectionDuration){
           prev_position = position; position = next_position; next_position = 6;
           previousMillis = currentMillis;
         }
@@ -702,7 +731,7 @@ void loop() {
     WideLeft.threshold = 800;
     if (prev_position == 15 && next_position == 22){
       if(WideRight.is_White() || WideLeft.is_White()){
-        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
+        if (currentMillis - previousMillis > 0.7 * expectedSectionDuration){
           prev_position = position; position = next_position; next_position = 22;
           previousMillis = currentMillis;
         }
@@ -713,7 +742,7 @@ void loop() {
       Left.threshold = 600;
       WideLeft.threshold = 600;
       if(WideRight.is_White() || WideLeft.is_White()){
-        if (currentMillis - previousMillis > 0.9 * expectedSectionDuration){
+        if (currentMillis - previousMillis > 0.7 * expectedSectionDuration){
           prev_position = position; position = next_position; next_position = 16;
           previousMillis = currentMillis;
         }
@@ -727,6 +756,9 @@ void loop() {
     if (prev_position == 21 && next_position == 22){
       if(WideRight.is_Black() || WideLeft.is_Black()){
         deposit();
+        while (Right.is_Black() && Left.is_Black()){
+          motor_forward(150, 150);
+        }
         prev_position = position; position = next_position; next_position = 21;
         previousMillis = currentMillis;
       }
@@ -737,6 +769,4 @@ void loop() {
       }
     }
   }
-
-  delay(2);
 }
