@@ -252,9 +252,9 @@ void collect(){
   delay(5000);
   grabber.write(grabber_closed_position);
 
-  if (block_location == 2 || block_location == 3){
+  /*if (block_location == 2 || block_location == 3){
     turn_left_180();
-  }
+  }*/
 }
 
 void deposit(){
@@ -503,7 +503,14 @@ void loop() {
     } else if (prev_position == 6 && next_position == 19){
       if((currentMillis - previousMillis) > 250){
         turn_left_90();
-        prev_position = position; position = next_position; next_position = 19;
+        motor_forward(255, 255-left_offset);
+        delay(1000);
+        collect();
+        motorLeft->run(BACKWARD);
+        motorRight->run(BACKWARD);
+        delay(1000);
+        turn_right_90();
+        prev_position = position; position = 8; next_position = 9;
         previousMillis = currentMillis;
         grabber.write(grabber_open_position);
       }
@@ -666,10 +673,7 @@ void loop() {
     if (prev_position == 17 && next_position == 18){
       if(WideRight.is_Black() || WideLeft.is_Black()){
         deposit();
-        while (Right.is_Black() && Left.is_Black()){
-          motor_forward(150, 150-left_offset);
-        }
-        prev_position = position; position = next_position; next_position = 18;
+        prev_position = position; position = next_position; next_position = 17;
         previousMillis = currentMillis;
       }
     } else if (prev_position == 18 && next_position == 17){
@@ -760,7 +764,7 @@ void loop() {
       if(WideRight.is_Black() || WideLeft.is_Black()){
         deposit();
         while (Right.is_Black() && Left.is_Black()){
-          motor_forward(150, 150-left_offset);
+          motor_forward(150, 150);
         }
         prev_position = position; position = next_position; next_position = 21;
         previousMillis = currentMillis;
